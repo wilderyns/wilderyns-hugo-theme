@@ -1,0 +1,33 @@
+{{- $src := .Get "src" | default (.Get 0) -}}
+{{- $alt := .Get "alt" | default "" -}}
+{{- $caption := .Get "caption" | default "" -}}
+{{- $side := lower (.Get "side" | default "") -}}
+{{- $size := lower (.Get "size" | default "md") -}}
+{{- $class := .Get "class" | default "" -}}
+{{- $resolved := partial "resolve-image.html" (dict "page" .Page "image" $src) -}}
+{{- $figureClass := "my-[1.2rem] max-w-full" -}}
+{{- $sideClass := "" -}}
+{{- $sizeClass := "md:max-w-[min(44%,360px)]" -}}
+
+{{- if eq $side "left" -}}
+{{- $sideClass = "md:float-left md:mr-[1.15rem] md:mb-[0.95rem] md:mt-[0.35rem]" -}}
+{{- else if eq $side "right" -}}
+{{- $sideClass = "md:float-right md:ml-[1.15rem] md:mb-[0.95rem] md:mt-[0.35rem]" -}}
+{{- end -}}
+
+{{- if eq $size "sm" -}}
+{{- $sizeClass = "md:max-w-[min(36%,300px)]" -}}
+{{- else if eq $size "lg" -}}
+{{- $sizeClass = "md:max-w-[min(52%,440px)]" -}}
+{{- end -}}
+
+{{- if $resolved -}}
+<figure class="{{ $figureClass }} {{ $sideClass }} {{ $sizeClass }} {{ $class }}">
+    <img class="mx-auto my-[1.1rem] block h-auto max-w-full rounded-[10px] border border-[var(--line)]"
+         src="{{ $resolved }}" alt="{{ $alt }}" loading="lazy"/>
+    {{ with $caption }}
+    <figcaption class="mt-[0.38rem] text-center text-[0.8rem] text-[var(--story-meta)]">{{ . | markdownify }}
+    </figcaption>
+    {{ end }}
+</figure>
+{{- end -}}

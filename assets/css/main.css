@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root,
+    :root[data-theme="dark"] {
+        --ink: #e8f0f8;
+        --ink-strong: #f4f9ff;
+        --muted: #9ab2c8;
+        --line: #2a4259;
+        --accent: #49d0c4;
+        --accent-2: #7fb8ff;
+        --warning: #ffcc67;
+        --surface: linear-gradient(145deg, rgba(18, 33, 49, 0.92), rgba(16, 28, 39, 0.95));
+        --header-bg: rgba(11, 17, 25, 0.66);
+        --nav-ink: #d7e7f6;
+        --nav-active-bg: rgba(127, 184, 255, 0.16);
+        --nav-active-border: rgba(127, 184, 255, 0.45);
+        --nav-active-ink: #fff;
+        --button-bg: linear-gradient(120deg, rgba(73, 208, 196, 0.2), rgba(127, 184, 255, 0.2));
+        --button-border: rgba(73, 208, 196, 0.44);
+        --button-ink: #e8fdff;
+        --social-bg: rgba(9, 16, 24, 0.55);
+        --social-border: rgba(127, 184, 255, 0.28);
+        --social-ink: #dff7ff;
+        --hero-role: #d5ebff;
+        --story-meta: #89a7bf;
+        --panel-strong: #e4f7ff;
+        --placeholder-bg: repeating-linear-gradient(45deg, rgba(73, 208, 196, 0.11), rgba(73, 208, 196, 0.11) 20px, rgba(127, 184, 255, 0.13) 20px, rgba(127, 184, 255, 0.13) 40px),
+        linear-gradient(170deg, #11202e, #152838);
+        --placeholder-ink: #c6e3ff;
+        --tag-bg: rgba(127, 184, 255, 0.12);
+        --tag-border: rgba(127, 184, 255, 0.34);
+        --tag-ink: #dbeeff;
+        --pre-bg: #0c1722;
+        --timeline-org: #bad4e9;
+        --stack-strong: #eaf6ff;
+        --copyright: #8ca8c0;
+        --empty-bg: rgba(73, 208, 196, 0.12);
+        --empty-border: rgba(73, 208, 196, 0.36);
+        --social-empty: #c5dbf0;
+        --bg-layer-1: radial-gradient(1300px 700px at 0% -20%, rgba(73, 208, 196, 0.16), transparent 55%);
+        --bg-layer-2: radial-gradient(1100px 600px at 100% 0%, rgba(127, 184, 255, 0.17), transparent 52%);
+        --bg-layer-3: linear-gradient(150deg, #0a1118, #101a24 42%, #0c151e);
+        --shadow: 0 24px 40px -26px rgba(0, 0, 0, 0.8);
+        --radius: 18px;
+    }
+
+    :root[data-theme="light"] {
+        --ink: #13263a;
+        --ink-strong: #0f1f31;
+        --muted: #3e556b;
+        --line: #b2c6d8;
+        --accent: #0e8b86;
+        --accent-2: #2f78cf;
+        --warning: #9b6414;
+        --surface: linear-gradient(145deg, rgba(252, 254, 255, 0.95), rgba(240, 248, 255, 0.98));
+        --header-bg: rgba(245, 251, 255, 0.82);
+        --nav-ink: #234260;
+        --nav-active-bg: rgba(47, 120, 207, 0.12);
+        --nav-active-border: rgba(47, 120, 207, 0.35);
+        --nav-active-ink: #163355;
+        --button-bg: linear-gradient(120deg, rgba(14, 139, 134, 0.12), rgba(47, 120, 207, 0.12));
+        --button-border: rgba(14, 139, 134, 0.34);
+        --button-ink: #0f3658;
+        --social-bg: rgba(255, 255, 255, 0.9);
+        --social-border: rgba(47, 120, 207, 0.24);
+        --social-ink: #15375a;
+        --hero-role: #25486c;
+        --story-meta: #48657f;
+        --panel-strong: #16385c;
+        --placeholder-bg: repeating-linear-gradient(45deg, rgba(14, 139, 134, 0.11), rgba(14, 139, 134, 0.11) 20px, rgba(47, 120, 207, 0.13) 20px, rgba(47, 120, 207, 0.13) 40px),
+        linear-gradient(170deg, #dae8f5, #edf5fb);
+        --placeholder-ink: #244a72;
+        --tag-bg: rgba(47, 120, 207, 0.1);
+        --tag-border: rgba(47, 120, 207, 0.24);
+        --tag-ink: #1d4061;
+        --pre-bg: #eff6fd;
+        --timeline-org: #365979;
+        --stack-strong: #123052;
+        --copyright: #4a6580;
+        --empty-bg: rgba(14, 139, 134, 0.1);
+        --empty-border: rgba(14, 139, 134, 0.26);
+        --social-empty: #335576;
+        --bg-layer-1: radial-gradient(1300px 700px at 0% -20%, rgba(14, 139, 134, 0.12), transparent 55%);
+        --bg-layer-2: radial-gradient(1100px 600px at 100% 0%, rgba(47, 120, 207, 0.16), transparent 52%);
+        --bg-layer-3: linear-gradient(150deg, #f3f8ff, #eef6ff 42%, #eff8ff);
+        --shadow: 0 20px 34px -24px rgba(49, 84, 117, 0.4);
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        background: var(--bg-layer-1), var(--bg-layer-2), var(--bg-layer-3);
+        color: var(--ink);
+        font-family: "IBM Plex Sans", "Avenir Next", "Segoe UI", sans-serif;
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    a {
+        color: inherit;
+    }
+}

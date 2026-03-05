@@ -1,0 +1,29 @@
+{{ define "main" }}
+{{- $terms := .Data.Terms.Alphabetical -}}
+{{- $taxonomyLabel := .Data.Plural | humanize -}}
+
+<section class="animate-reveal motion-reduce:animate-none mx-auto mt-4 w-full max-w-[1160px] px-[1.1rem]">
+    <p class="mb-[0.65rem] mt-0 font-mono text-[0.78rem] font-bold uppercase tracking-[0.1em] text-[var(--accent)]">{{
+        $taxonomyLabel }}</p>
+    <h1 class="m-0 font-display text-[clamp(2rem,4.6vw,3.7rem)] leading-[1.02] text-[var(--ink-strong)]">Browse {{
+        $taxonomyLabel }}</h1>
+    <p class="mt-3 text-[var(--muted)]">Jump into posts by topic.</p>
+</section>
+
+<section class="animate-reveal motion-reduce:animate-none mx-auto mt-[2.4rem] w-full max-w-[1160px] px-[1.1rem]">
+    {{ if gt (len $terms) 0 }}
+    <div class="flex flex-wrap gap-[0.56rem]">
+        {{ range $terms }}
+        <a class="inline-flex items-center gap-[0.3rem] rounded-full border border-[var(--tag-border)] bg-[var(--tag-bg)] px-[0.7rem] py-[0.42rem] text-[0.86rem] font-bold leading-none text-[var(--tag-ink)] no-underline transition duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(127,184,255,0.68)]"
+           href="{{ .Page.RelPermalink }}">
+            <span>#{{ .Page.Title }}</span>
+            <span class="min-w-[1.35rem] rounded-full bg-[color:rgba(127,184,255,0.18)] px-[0.36rem] py-[0.16rem] text-center text-[0.72rem]">{{ .Count }}</span>
+        </a>
+        {{ end }}
+    </div>
+    {{ else }}
+    <p class="rounded-xl border border-[var(--empty-border)] bg-[var(--empty-bg)] px-[0.9rem] py-[0.75rem] text-[var(--muted)]">
+        No terms published yet.</p>
+    {{ end }}
+</section>
+{{ end }}

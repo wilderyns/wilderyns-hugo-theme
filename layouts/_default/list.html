@@ -1,0 +1,30 @@
+{{ define "main" }}
+<section class="animate-reveal motion-reduce:animate-none mx-auto mt-4 w-full max-w-[1160px] px-[1.1rem]">
+    <p class="mb-[0.65rem] mt-0 font-mono text-[0.78rem] font-bold uppercase tracking-[0.1em] text-[var(--accent)]">
+        Section</p>
+    <h1 class="m-0 font-display text-[clamp(2rem,4.6vw,3.7rem)] leading-[1.02] text-[var(--ink-strong)]">{{ .Title
+        }}</h1>
+    <div class="mt-3 text-[var(--muted)]">{{ .Content }}</div>
+</section>
+
+{{ if gt (len .RegularPages) 0 }}
+<section class="animate-reveal motion-reduce:animate-none mx-auto mt-[2.4rem] w-full max-w-[1160px] px-[1.1rem]">
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {{ range .RegularPages }}
+        <article
+                class="flex flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] [box-shadow:var(--shadow)]">
+            <div class="flex flex-1 flex-col gap-[0.56rem] p-4">
+                <h2 class="m-0 font-display text-[1.22rem] text-[var(--ink-strong)]"><a class="no-underline"
+                                                                                        href="{{ .RelPermalink }}">{{
+                    .Title }}</a></h2>
+                <p class="m-0 text-[var(--muted)]">{{ with .Description }}{{ . }}{{ else }}{{ .Summary | plainify |
+                    truncate 150 }}{{ end }}</p>
+                <a class="motion-reduce:transform-none motion-reduce:transition-none inline-flex w-fit rounded-xl border border-[var(--button-border)] bg-[image:var(--button-bg)] px-[0.78rem] py-[0.48rem] text-[0.9rem] font-bold text-[var(--button-ink)] no-underline transition duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(127,184,255,0.7)]"
+                   href="{{ .RelPermalink }}">Open page</a>
+            </div>
+        </article>
+        {{ end }}
+    </div>
+</section>
+{{ end }}
+{{ end }}

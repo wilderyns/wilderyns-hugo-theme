@@ -1,0 +1,22 @@
+{{- $page := .page -}}
+{{- $image := .image | default "" -}}
+{{- $fallback := .fallback | default "" -}}
+{{- $result := "" -}}
+
+{{- if $image -}}
+{{- $resource := $page.Resources.GetMatch $image -}}
+{{- if and (not $resource) (not (hasPrefix $image "/")) -}}
+{{- $resource = $page.Resources.GetMatch (printf "*%s*" $image) -}}
+{{- end -}}
+{{- if $resource -}}
+{{- $result = $resource.RelPermalink -}}
+{{- else if hasPrefix $image "/" -}}
+{{- $result = relURL (strings.TrimPrefix "/" $image) -}}
+{{- else -}}
+{{- $result = $image -}}
+{{- end -}}
+{{- else -}}
+{{- $result = $fallback -}}
+{{- end -}}
+
+{{- return $result -}}

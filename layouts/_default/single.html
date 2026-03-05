@@ -1,0 +1,14 @@
+{{ define "main" }}
+<article
+        class="animate-reveal motion-reduce:animate-none mx-auto mt-[1.2rem] w-full max-w-[1160px] overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] px-[1.1rem] py-[1.3rem] [box-shadow:var(--shadow)]">
+    <header class="mx-auto mb-4 max-w-[96ch]">
+        <p class="mb-[0.65rem] mt-0 font-mono text-[0.78rem] font-bold uppercase tracking-[0.1em] text-[var(--accent)]">
+            Page</p>
+        <h1 class="m-0 font-display text-[clamp(2rem,4.6vw,3.7rem)] leading-[1.02] text-[var(--ink-strong)]">{{ .Title
+            }}</h1>
+    </header>
+    <div class="mx-auto max-w-[94ch] text-[var(--muted)] after:block after:clear-both after:content-[''] [&_a]:text-[var(--accent)] [&_a]:underline-offset-2 hover:[&_a]:text-[var(--accent-2)] [&_h2]:mb-[0.8rem] [&_h2]:mt-8 [&_h2]:font-display [&_h2]:text-[1.8rem] [&_h2]:leading-tight [&_h2]:text-[var(--ink-strong)] [&_h3]:mb-[0.8rem] [&_h3]:mt-8 [&_h3]:font-display [&_h3]:text-[1.35rem] [&_h3]:leading-tight [&_h3]:text-[var(--ink-strong)] [&_p]:leading-[1.74] [&_li]:leading-[1.74] [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:border [&_pre]:border-[var(--line)] [&_pre]:bg-[var(--pre-bg)] [&_pre]:p-[0.85rem] [&_blockquote]:my-4 [&_blockquote]:border-l-[3px] [&_blockquote]:border-[var(--accent)] [&_blockquote]:pl-[0.95rem] [&_img]:mx-auto [&_img]:my-[1.1rem] [&_img]:block [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-[10px] [&_img]:border [&_img]:border-[var(--line)] [&_figcaption]:mt-[0.38rem] [&_figcaption]:text-center [&_figcaption]:text-[0.8rem] [&_figcaption]:text-[var(--story-meta)] [&_p_code]:rounded-md [&_p_code]:border [&_p_code]:border-[color:rgba(127,184,255,0.32)] [&_p_code]:bg-[color:rgba(127,184,255,0.13)] [&_p_code]:px-[0.34rem] [&_p_code]:py-[0.1rem] [&_p_code]:font-mono [&_li_code]:rounded-md [&_li_code]:border [&_li_code]:border-[color:rgba(127,184,255,0.32)] [&_li_code]:bg-[color:rgba(127,184,255,0.13)] [&_li_code]:px-[0.34rem] [&_li_code]:py-[0.1rem] [&_li_code]:font-mono [&_.highlight]:my-[1.35rem] [&_.highlight]:overflow-x-auto [&_.highlight]:rounded-[14px] [&_.highlight]:border [&_.highlight]:border-[var(--line)] [&_.highlight]:bg-[#0f1822] [&_.highlight]:shadow-[inset_0_0_0_1px_rgba(127,184,255,0.08)] [&_.highlight_pre]:m-0 [&_.highlight_pre]:border-0 [&_.highlight_pre]:bg-transparent [&_.highlight_pre]:p-4 [&_.highlight_code]:border-0 [&_.highlight_code]:bg-transparent [&_.highlight_code]:p-0 [&_.highlight_code]:font-mono [&_.highlight_code]:text-[0.9rem] [&_.highlight_code]:leading-[1.62]">
+        {{ .Content }}
+    </div>
+</article>
+{{ end }}

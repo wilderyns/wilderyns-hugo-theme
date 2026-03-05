@@ -1,0 +1,45 @@
+{{ define "main" }}
+<section class="animate-reveal motion-reduce:animate-none mx-auto mt-4 w-full max-w-[1160px] px-[1.1rem]">
+    <p class="mb-[0.65rem] mt-0 font-mono text-[0.78rem] font-bold uppercase tracking-[0.1em] text-[var(--accent)]">
+        Projects</p>
+    <h1 class="m-0 font-display text-[clamp(2rem,4.6vw,3.7rem)] leading-[1.02] text-[var(--ink-strong)]">{{ .Title
+        }}</h1>
+    {{ with .Content }}
+    <div class="mt-3 text-[var(--muted)]">{{ . }}</div>
+    {{ end }}
+</section>
+
+<section class="animate-reveal motion-reduce:animate-none mx-auto mt-[2.4rem] w-full max-w-[1160px] px-[1.1rem]">
+    {{ if gt (len .RegularPages) 0 }}
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {{ range .RegularPages }}
+        {{- $image := .Params.featured_image | default .Params.image -}}
+        {{- $imageURL := partial "resolve-image.html" (dict "page" . "image" $image) -}}
+        <article
+                class="flex flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] [box-shadow:var(--shadow)]">
+            <a class="block min-h-[168px]" href="{{ .RelPermalink }}">
+                {{ if $imageURL }}
+                <img class="block h-full w-full object-cover" src="{{ $imageURL }}" alt="" loading="lazy"/>
+                {{ else }}
+                <div class="flex h-full items-center justify-center bg-[image:var(--placeholder-bg)] font-mono text-[0.85rem] font-bold uppercase tracking-[0.08em] text-[var(--placeholder-ink)]">
+                    <span>Project</span></div>
+                {{ end }}
+            </a>
+            <div class="flex flex-1 flex-col gap-[0.56rem] p-4">
+                <h2 class="m-0 font-display text-[1.22rem] text-[var(--ink-strong)]"><a class="no-underline"
+                                                                                        href="{{ .RelPermalink }}">{{
+                    .Title }}</a></h2>
+                <p class="m-0 text-[var(--muted)]">{{ with .Description }}{{ . }}{{ else }}{{ .Summary | plainify |
+                    truncate 160 }}{{ end }}</p>
+                <a class="motion-reduce:transform-none motion-reduce:transition-none inline-flex w-fit rounded-xl border border-[var(--button-border)] bg-[image:var(--button-bg)] px-[0.78rem] py-[0.48rem] text-[0.9rem] font-bold text-[var(--button-ink)] no-underline transition duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(127,184,255,0.7)]"
+                   href="{{ .RelPermalink }}">View details</a>
+            </div>
+        </article>
+        {{ end }}
+    </div>
+    {{ else }}
+    <p class="rounded-xl border border-[var(--empty-border)] bg-[var(--empty-bg)] px-[0.9rem] py-[0.75rem] text-[var(--muted)]">
+        No project pages yet. Add one with `hugo new projects/project-name/index.md`.</p>
+    {{ end }}
+</section>
+{{ end }}

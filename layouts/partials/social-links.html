@@ -1,0 +1,27 @@
+{{- $featuredOnly := .featuredOnly | default false -}}
+{{- $variant := .variant | default "default" -}}
+{{- $social := site.Params.social | default (slice) -}}
+{{- $hasItems := false -}}
+{{- $listClass := "m-0 flex list-none flex-wrap gap-[0.52rem] p-0" -}}
+{{- if eq $variant "footer" -}}
+{{- $listClass = printf "%s max-w-[500px]" $listClass -}}
+{{- end -}}
+
+<ul class="{{ $listClass }}">
+    {{- range $social -}}
+    {{- if or (not $featuredOnly) .featured -}}
+    {{- $hasItems = true -}}
+    <li>
+        <a class="inline-flex items-center gap-[0.45rem] rounded-full border border-[var(--social-border)] bg-[var(--social-bg)] px-3 py-[0.42rem] text-[var(--social-ink)] no-underline transition duration-200 hover:-translate-y-0.5"
+           href="{{ .url }}" target="_blank" rel="noreferrer me">
+            <span class="inline-flex h-[15px] w-[15px] shrink-0 [&_svg]:w-full [&_svg]:fill-current">{{ partial "icon.html" .icon }}</span>
+            <span>{{ .name }}</span>
+        </a>
+    </li>
+    {{- end -}}
+    {{- end -}}
+</ul>
+
+{{- if not $hasItems -}}
+<p class="text-[0.9rem] text-[var(--social-empty)]">Add social links in `hugo.yaml` under `params.social`.</p>
+{{- end -}}

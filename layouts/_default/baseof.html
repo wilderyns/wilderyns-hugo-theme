@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="{{ site.Language.Lang | default " en" }}">
+<head>
+    {{ partial "head.html" . }}
+</head>
+<body class="text-[var(--ink)]">
+{{ partial "header.html" . }}
+<main id="content" class="px-0 pb-[3.4rem] pt-[0.9rem] md:pt-[1.2rem]">
+    {{ block "main" . }}{{ end }}
+</main>
+{{ partial "footer.html" . }}
+<script>
+    (function () {
+        var root = document.documentElement;
+        var button = document.getElementById("theme-toggle");
+        if (!button) return;
+
+        var label = button.querySelector(".theme-toggle-text");
+        var icon = button.querySelector(".theme-toggle-icon");
+
+        function applyTheme(theme) {
+            root.setAttribute("data-theme", theme);
+            try {
+                localStorage.setItem("wilderyns-theme", theme);
+            } catch (e) {
+            }
+            var next = theme === "dark" ? "Light" : "Dark";
+            button.setAttribute("aria-label", "Switch to " + next.toLowerCase() + " mode");
+            if (label) label.textContent = next;
+            if (icon) icon.textContent = theme === "dark" ? "☾" : "☀";
+        }
+
+        var current = root.getAttribute("data-theme");
+        applyTheme(current === "light" ? "light" : "dark");
+
+        button.addEventListener("click", function () {
+            var active = root.getAttribute("data-theme") === "light" ? "light" : "dark";
+            applyTheme(active === "dark" ? "light" : "dark");
+        });
+    })();
+</script>
+</body>
+</html>

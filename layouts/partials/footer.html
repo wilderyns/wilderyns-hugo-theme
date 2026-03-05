@@ -1,0 +1,14 @@
+<footer class="mt-12 border-t border-[color:rgba(73,208,196,0.3)] py-8 pb-6">
+    <div class="mx-auto grid w-full max-w-[1160px] gap-[1.2rem] px-[1.1rem] md:grid-cols-2">
+        <div>
+            <h2 class="font-display text-[1.3rem] text-[var(--ink-strong)]">{{ site.Title }}</h2>
+            <p class="text-[var(--muted)]">{{ site.Params.author.statement }}</p>
+        </div>
+        <div>
+            <h3 class="font-display text-[1rem] text-[var(--ink-strong)]">All Social Links</h3>
+            {{ partial "social-links.html" (dict "featuredOnly" false "variant" "footer") }}
+        </div>
+    </div>
+    <p class="mx-auto mt-4 w-full max-w-[1160px] px-[1.1rem] text-[0.82rem] text-[var(--copyright)]">© {{ now.Year }} {{
+        site.Params.author.name }}. Built with Hugo.</p>
+</footer>

@@ -1,0 +1,21 @@
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} | {{ site.Title }}{{ end }}</title>
+<meta name="description"
+      content="{{ with .Description }}{{ . }}{{ else }}{{ with site.Params.author.statement }}{{ . }}{{ else }}Personal website and blog{{ end }}{{ end }}"/>
+<meta name="color-scheme" content="dark light"/>
+<script>
+    (function () {
+        var saved = null;
+        try {
+            saved = localStorage.getItem("wilderyns-theme");
+        } catch (e) {
+        }
+        var theme = (saved === "light" || saved === "dark") ? saved : "dark";
+        document.documentElement.setAttribute("data-theme", theme);
+    })();
+</script>
+{{- $main := resources.Get "css/main.css" | css.PostCSS (dict "config" "postcss.config.js") -}}
+{{- $chroma := resources.Get "css/chroma.css" -}}
+{{- $css := slice $main $chroma | resources.Concat "css/main.css" | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}"/>

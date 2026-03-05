@@ -1,0 +1,12 @@
+name = "Wilderyns"
+license = "MIT"
+licenselink = "https://opensource.org/licenses/MIT"
+description = "A custom Hugo theme for personal blog + cybersecurity/networking portfolio."
+homepage = "https://example.org/"
+tags = ["blog", "portfolio", "cybersecurity", "networking"]
+features = ["blog", "projects", "career", "responsive"]
+min_version = "0.120.0"
+
+[author]
+name = "Alex Wilde"
+homepage = "https://example.org/"

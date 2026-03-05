@@ -1,0 +1,27 @@
+<header class="sticky top-0 z-[100] border-b border-[color:rgba(73,208,196,0.2)] bg-[var(--header-bg)] backdrop-blur">
+    <div class="mx-auto flex min-h-[72px] w-full max-w-[1160px] flex-col gap-3 px-[1.1rem] py-3 md:flex-row md:items-center md:justify-between md:py-0">
+        <a class="inline-flex items-center gap-[0.55rem] no-underline" href="{{ "/" | relURL }}">
+        <span class="grid h-7 w-7 place-content-center rounded-[10px] bg-[linear-gradient(135deg,var(--accent),var(--accent-2))] font-mono text-[0.95rem] font-bold text-[#03171b]">W</span>
+        <span class="font-mono text-[0.93rem] font-bold uppercase tracking-[0.04em]">{{ site.Title }}</span>
+        </a>
+
+        <div class="flex w-full flex-wrap items-start justify-between gap-2 md:w-auto md:items-center md:justify-end md:gap-[0.55rem]">
+            <nav class="flex flex-wrap gap-[0.35rem]" aria-label="Main navigation">
+                {{ range site.Menus.main }}
+                {{- $active := or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) -}}
+                <a
+                        class="rounded-full border px-3 py-[0.4rem] text-[0.92rem] font-semibold no-underline transition duration-200 {{ if $active }}border-[var(--nav-active-border)] bg-[var(--nav-active-bg)] text-[var(--nav-active-ink)]{{ else }}border-transparent text-[var(--nav-ink)] hover:border-[var(--nav-active-border)] hover:bg-[var(--nav-active-bg)] hover:text-[var(--nav-active-ink)]{{ end }}"
+                        href="{{ .URL }}"
+                >{{ .Name }}</a>
+                {{ end }}
+            </nav>
+            <button id="theme-toggle"
+                    class="motion-reduce:transform-none motion-reduce:transition-none inline-flex items-center gap-[0.38rem] rounded-full border border-[var(--button-border)] bg-[image:var(--button-bg)] px-[0.68rem] py-[0.38rem] text-[0.83rem] font-bold leading-none text-[var(--button-ink)] transition duration-200 hover:-translate-y-0.5"
+                    type="button" aria-label="Switch to light mode">
+                <span class="theme-toggle-icon inline-grid h-4 w-4 place-items-center text-[0.94rem]"
+                      aria-hidden="true"></span>
+                <span class="theme-toggle-text">Light</span>
+            </button>
+        </div>
+    </div>
+</header>

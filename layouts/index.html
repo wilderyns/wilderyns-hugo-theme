@@ -1,0 +1,105 @@
+{{ define "main" }}
+{{- $posts := first 6 (where site.RegularPages "Section" "blog") -}}
+{{- $projects := first 3 (where site.RegularPages "Section" "projects") -}}
+{{- $profile := site.Data.profile -}}
+{{- $aboutTitle := site.Params.homepage.aboutTitle | default "About Me" -}}
+{{- $aboutText := site.Params.homepage.aboutText | default site.Params.author.statement -}}
+{{- $aboutItems := site.Params.homepage.aboutItems | default $profile.summary -}}
+
+<section
+        class="animate-reveal motion-reduce:animate-none mx-auto mt-[1.1rem] grid w-full max-w-[1160px] gap-4 px-[1.1rem] lg:grid-cols-[1.5fr_1fr]">
+    <div class="rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] p-[1.65rem] [box-shadow:var(--shadow)]">
+        <p class="mb-[0.65rem] mt-0 font-mono text-[0.78rem] font-bold uppercase tracking-[0.1em] text-[var(--accent)]">
+            Developer Portfolio + Blog</p>
+        <h1 class="m-0 font-display text-[clamp(2rem,4.6vw,3.7rem)] leading-[1.02] text-[var(--ink-strong)]">{{
+            site.Params.homepage.introTitle | default site.Params.author.name }}</h1>
+        <p class="m-0 mt-[0.8rem] text-[clamp(1.04rem,2.3vw,1.36rem)] font-semibold text-[var(--hero-role)]">{{
+            site.Params.homepage.introSubtitle | default site.Params.author.role }}</p>
+        <p class="mt-[0.9rem] max-w-[62ch] text-[var(--muted)]">{{ site.Params.homepage.introText }}</p>
+        <div class="mt-[1.2rem] flex flex-wrap gap-[0.65rem]">
+            <a class="motion-reduce:transform-none motion-reduce:transition-none inline-flex rounded-xl border border-[var(--button-border)] bg-[image:var(--button-bg)] px-[0.78rem] py-[0.48rem] text-[0.9rem] font-bold text-[var(--button-ink)] no-underline transition duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(127,184,255,0.7)]"
+               href="{{ "/career/" | relURL }}">Career Snapshot</a>
+            <a class="motion-reduce:transform-none motion-reduce:transition-none inline-flex rounded-xl border border-[var(--button-border)] bg-[image:var(--button-bg)] px-[0.78rem] py-[0.48rem] text-[0.9rem] font-bold text-[var(--button-ink)] no-underline transition duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(127,184,255,0.7)]"
+               href="{{ "/projects/" | relURL }}">See Projects</a>
+        </div>
+        <div class="mt-[1.35rem]">
+            <h2 class="mb-[0.55rem] mt-0 font-display text-[1.02rem] text-[var(--ink-strong)]">Find me online</h2>
+            {{ partial "social-links.html" (dict "featuredOnly" true "variant" "featured") }}
+        </div>
+    </div>
+    <aside class="rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] p-[1.4rem] [box-shadow:var(--shadow)]">
+        <h2 class="mb-[0.25rem] mt-0 font-display text-[1.25rem] text-[var(--ink-strong)]">{{ $aboutTitle }}</h2>
+        <p class="m-0 text-[var(--muted)]">{{ $aboutText }}</p>
+        <ul class="m-0 mt-[0.9rem] list-none p-0">
+            {{ range $aboutItems }}
+            <li class="grid gap-[0.2rem] border-t border-[color:rgba(127,184,255,0.28)] py-[0.7rem]">
+                <strong class="text-[0.84rem] uppercase tracking-[0.02em] text-[var(--panel-strong)]">{{ .title
+                    }}</strong>
+                <span class="text-[var(--muted)]">{{ .value }}</span>
+            </li>
+            {{ end }}
+        </ul>
+    </aside>
+</section>
+
+<section class="animate-reveal motion-reduce:animate-none mx-auto mt-[2.4rem] w-full max-w-[1160px] px-[1.1rem]">
+    <div class="mb-4 flex items-baseline justify-between gap-[0.8rem]">
+        <h2 class="m-0 font-display text-[clamp(1.5rem,2.2vw,2.1rem)] text-[var(--ink-strong)]">Latest Posts</h2>
+        <a class="text-[0.9rem] font-bold text-[var(--accent)] no-underline" href="{{ "/blog/" | relURL }}">Browse
+        all</a>
+    </div>
+    {{ if gt (len $posts) 0 }}
+    <div class="grid gap-4">
+        {{ range $idx, $post := $posts }}
+        {{ partial "post-row.html" (dict "post" $post "index" $idx) }}
+        {{ end }}
+    </div>
+    {{ else }}
+    <p class="rounded-xl border border-[var(--empty-border)] bg-[var(--empty-bg)] px-[0.9rem] py-[0.75rem] text-[var(--muted)]">
+        No blog posts yet. Create one with `hugo new blog/my-first-post/index.md`.</p>
+    {{ end }}
+</section>
+
+<section class="animate-reveal motion-reduce:animate-none mx-auto mt-[2.4rem] w-full max-w-[1160px] px-[1.1rem]">
+    <div class="mb-4 flex items-baseline justify-between gap-[0.8rem]">
+        <h2 class="m-0 font-display text-[clamp(1.5rem,2.2vw,2.1rem)] text-[var(--ink-strong)]">Skills Snapshot</h2>
+        <a class="text-[0.9rem] font-bold text-[var(--accent)] no-underline" href="{{ "/career/" | relURL }}">Full
+        profile</a>
+    </div>
+    {{ partial "skills-map.html" $profile.skills }}
+</section>
+
+<section class="animate-reveal motion-reduce:animate-none mx-auto mt-[2.4rem] w-full max-w-[1160px] px-[1.1rem]">
+    <div class="mb-4 flex items-baseline justify-between gap-[0.8rem]">
+        <h2 class="m-0 font-display text-[clamp(1.5rem,2.2vw,2.1rem)] text-[var(--ink-strong)]">Project Highlights</h2>
+        <a class="text-[0.9rem] font-bold text-[var(--accent)] no-underline" href="{{ "/projects/" | relURL }}">All
+        projects</a>
+    </div>
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {{ range $project := $projects }}
+        {{- $image := $project.Params.featured_image | default $project.Params.image -}}
+        {{- $imageURL := partial "resolve-image.html" (dict "page" $project "image" $image) -}}
+        <article
+                class="flex flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] [box-shadow:var(--shadow)]">
+            <a class="block min-h-[168px]" href="{{ $project.RelPermalink }}">
+                {{ if $imageURL }}
+                <img class="block h-full w-full object-cover" src="{{ $imageURL }}" alt="" loading="lazy"/>
+                {{ else }}
+                <div class="flex h-full items-center justify-center bg-[image:var(--placeholder-bg)] font-mono text-[0.85rem] font-bold uppercase tracking-[0.08em] text-[var(--placeholder-ink)]">
+                    <span>Project</span></div>
+                {{ end }}
+            </a>
+            <div class="flex flex-1 flex-col gap-[0.56rem] p-4">
+                <h3 class="m-0 font-display text-[1.22rem] text-[var(--ink-strong)]"><a class="no-underline"
+                                                                                        href="{{ $project.RelPermalink }}">{{
+                    $project.Title }}</a></h3>
+                <p class="m-0 text-[var(--muted)]">{{ with $project.Description }}{{ . }}{{ else }}{{ $project.Summary |
+                    plainify | truncate 150 }}{{ end }}</p>
+                <a class="motion-reduce:transform-none motion-reduce:transition-none inline-flex w-fit rounded-xl border border-[var(--button-border)] bg-[image:var(--button-bg)] px-[0.78rem] py-[0.48rem] text-[0.9rem] font-bold text-[var(--button-ink)] no-underline transition duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(127,184,255,0.7)]"
+                   href="{{ $project.RelPermalink }}">Open project page</a>
+            </div>
+        </article>
+        {{ end }}
+    </div>
+</section>
+{{ end }}
