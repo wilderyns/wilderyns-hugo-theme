@@ -4,6 +4,12 @@
 <meta name="description"
       content="{{ with .Description }}{{ . }}{{ else }}{{ with site.Params.author.statement }}{{ . }}{{ else }}Personal website and blog{{ end }}{{ end }}"/>
 <meta name="color-scheme" content="dark light"/>
+{{- $googleAds := site.Params.integrations.googleAds -}}
+{{- $adClient := "" -}}
+{{- if $googleAds -}}
+{{- $adClient = $googleAds.client | default "" -}}
+{{- end -}}
+{{ with $adClient }}<meta name="google-adsense-account" content="{{ . }}"/>{{ end }}
 <link rel="apple-touch-icon" sizes="180x180" href="{{ "images/favicon/apple-touch-icon.png" | relURL }}"/>
 <link rel="icon" type="image/png" sizes="32x32" href="{{ "images/favicon/favicon-32x32.png" | relURL }}"/>
 <link rel="icon" type="image/png" sizes="16x16" href="{{ "images/favicon/favicon-16x16.png" | relURL }}"/>
