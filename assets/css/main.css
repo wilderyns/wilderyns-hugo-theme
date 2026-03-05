@@ -40,6 +40,7 @@
         --empty-bg: rgba(73, 208, 196, 0.12);
         --empty-border: rgba(73, 208, 196, 0.36);
         --social-empty: #c5dbf0;
+        --career-fade: rgba(11, 17, 25, 0.9);
         --bg-layer-1: radial-gradient(1300px 700px at 0% -20%, rgba(73, 208, 196, 0.16), transparent 55%);
         --bg-layer-2: radial-gradient(1100px 600px at 100% 0%, rgba(127, 184, 255, 0.17), transparent 52%);
         --bg-layer-3: linear-gradient(150deg, #0a1118, #101a24 42%, #0c151e);
@@ -83,6 +84,7 @@
         --empty-bg: rgba(14, 139, 134, 0.1);
         --empty-border: rgba(14, 139, 134, 0.26);
         --social-empty: #335576;
+        --career-fade: rgba(245, 251, 255, 0.95);
         --bg-layer-1: radial-gradient(1300px 700px at 0% -20%, rgba(14, 139, 134, 0.12), transparent 55%);
         --bg-layer-2: radial-gradient(1100px 600px at 100% 0%, rgba(47, 120, 207, 0.16), transparent 52%);
         --bg-layer-3: linear-gradient(150deg, #f3f8ff, #eef6ff 42%, #eff8ff);
@@ -111,5 +113,61 @@
 
     a {
         color: inherit;
+    }
+}
+
+@layer components {
+    .career-scroll-region {
+        scroll-behavior: smooth;
+        overscroll-behavior: contain;
+    }
+
+    .career-scroll-fade-top {
+        background: linear-gradient(to bottom, var(--career-fade), transparent);
+        transition: opacity 0.18s ease-out;
+    }
+
+    .career-scroll-fade-bottom {
+        background: linear-gradient(to top, var(--career-fade), transparent);
+        transition: opacity 0.18s ease-out;
+    }
+
+    .career-scroll-btn {
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .career-scroll-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+    }
+
+    .career-scroll-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.35;
+    }
+
+    .career-scroll-progress {
+        transition: width 0.18s ease-out;
+    }
+
+    @media (min-width: 1024px) {
+        .career-scroll-region {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(127, 184, 255, 0.52) transparent;
+        }
+
+        .career-scroll-region::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .career-scroll-region::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .career-scroll-region::-webkit-scrollbar-thumb {
+            border: 2px solid transparent;
+            border-radius: 999px;
+            background-clip: padding-box;
+            background: linear-gradient(180deg, rgba(73, 208, 196, 0.72), rgba(127, 184, 255, 0.72));
+        }
     }
 }
