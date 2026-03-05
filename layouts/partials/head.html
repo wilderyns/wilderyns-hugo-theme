@@ -23,4 +23,4 @@
 {{- $main := resources.Get "css/main.css" | css.PostCSS (dict "config" "postcss.config.js") -}}
 {{- $chroma := resources.Get "css/chroma.css" -}}
 {{- $css := slice $main $chroma | resources.Concat "css/main.css" | minify | fingerprint -}}
-<link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}"/>
+<link rel="stylesheet" href="{{ $css.RelPermalink }}"/>
