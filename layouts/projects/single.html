@@ -3,7 +3,7 @@
 {{- $imageURL := partial "resolve-image.html" (dict "page" . "image" $image) -}}
 
 <article
-        class="animate-reveal motion-reduce:animate-none mx-auto mt-[1.2rem] w-full max-w-[1160px] overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] px-[1.1rem] py-[1.3rem] [box-shadow:var(--shadow)]">
+        class="js-lightbox-scope animate-reveal motion-reduce:animate-none mx-auto mt-[1.2rem] w-full max-w-[1160px] overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] px-[1.1rem] py-[1.3rem] [box-shadow:var(--shadow)]">
     <div class="mx-auto max-w-[108ch]">
         <header class="mx-auto mb-4 max-w-[96ch]">
             <p class="mb-[0.65rem] mt-0 font-mono text-[0.78rem] font-bold uppercase tracking-[0.1em] text-[var(--accent)]">
@@ -31,4 +31,5 @@
         </div>
     </div>
 </article>
+{{ partial "image-lightbox.html" (dict "scopeSelector" ".js-lightbox-scope") }}
 {{ end }}

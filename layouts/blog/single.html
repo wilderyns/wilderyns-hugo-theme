@@ -63,6 +63,16 @@
 {{- end -}}
 {{- end -}}
 {{- $showAnyAd := and $showAds (or $showInlineAd $showBottomAd) -}}
+{{- $showTOC := false -}}
+{{- if or (eq (printf "%v" (.Params.show_toc | default false)) "true") (eq (printf "%v" (.Params.show_toc | default false)) "1") -}}
+{{- $showTOC = true -}}
+{{- end -}}
+{{- $tocOpen := false -}}
+{{- if or (eq (printf "%v" (.Params.toc_open | default false)) "true") (eq (printf "%v" (.Params.toc_open | default false)) "1") -}}
+{{- $tocOpen = true -}}
+{{- end -}}
+{{- $tocHTML := .TableOfContents -}}
+{{- $hasTOC := and $showTOC $tocHTML -}}
 {{- $dateISO := .Date.Format "2006-01-02" -}}
 {{- $dateLong := .Date.Format "January 2, 2006" -}}
 
@@ -75,48 +85,69 @@
         crossorigin="anonymous"></script>
 {{ end }}
 
+<div class="relative mx-auto mt-[1.2rem] w-full max-w-[1160px] {{ if $hasTOC }}lg:grid lg:grid-cols-[minmax(0,1fr)_0] lg:items-start{{ end }}">
 <article
-        class="animate-reveal motion-reduce:animate-none mx-auto mt-[1.2rem] w-full max-w-[1160px] overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] px-[1.1rem] py-[1.3rem] [box-shadow:var(--shadow)]">
-    <div class="mx-auto max-w-[108ch]">
-        <header class="mx-auto mb-4 max-w-[96ch]">
-            <p class="mb-[0.65rem] mt-0 font-mono text-[0.78rem] font-bold uppercase tracking-[0.1em] text-[var(--accent)]">
-                Post</p>
-            <h1 class="m-0 font-display text-[clamp(2rem,4.6vw,3.7rem)] leading-[1.02] text-[var(--ink-strong)]">{{
-                .Title }}</h1>
-            <p class="m-0 mt-2 flex flex-wrap gap-[0.42rem]">
-                <time class="text-[0.82rem] font-semibold text-[var(--story-meta)]" datetime="{{ $dateISO }}">{{ $dateLong }}</time>
-                <span class="text-[0.82rem] font-semibold text-[var(--story-meta)]">·</span>
-                <span class="text-[0.82rem] font-semibold text-[var(--story-meta)]">{{ .ReadingTime }} min read</span>
-            </p>
-            {{ with .GetTerms "tags" }}
-            <p class="m-0 mt-[0.55rem] flex flex-wrap gap-[0.4rem]" aria-label="Post tags">
-                {{ range . }}
-                <a class="inline-flex items-center rounded-full border border-[var(--tag-border)] bg-[var(--tag-bg)] px-[0.58rem] py-[0.28rem] text-[0.8rem] font-bold leading-none text-[var(--tag-ink)] no-underline transition duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(127,184,255,0.68)]"
-                   href="{{ .RelPermalink }}">#{{ .LinkTitle }}</a>
-                {{ end }}
-            </p>
+        class="js-lightbox-scope animate-reveal motion-reduce:animate-none w-full overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] px-[1.1rem] py-[1.3rem] [box-shadow:var(--shadow)]">
+    <header class="mx-auto mb-4 max-w-[96ch]">
+        <p class="mb-[0.65rem] mt-0 font-mono text-[0.78rem] font-bold uppercase tracking-[0.1em] text-[var(--accent)]">
+            Post</p>
+        <h1 class="m-0 font-display text-[clamp(2rem,4.6vw,3.7rem)] leading-[1.02] text-[var(--ink-strong)]">{{ .Title }}</h1>
+        <p class="m-0 mt-2 flex flex-wrap gap-[0.42rem]">
+            <time class="text-[0.82rem] font-semibold text-[var(--story-meta)]" datetime="{{ $dateISO }}">{{ $dateLong }}</time>
+            <span class="text-[0.82rem] font-semibold text-[var(--story-meta)]">·</span>
+            <span class="text-[0.82rem] font-semibold text-[var(--story-meta)]">{{ .ReadingTime }} min read</span>
+        </p>
+        {{ with .GetTerms "tags" }}
+        <p class="m-0 mt-[0.55rem] flex flex-wrap gap-[0.4rem]" aria-label="Post tags">
+            {{ range . }}
+            <a class="inline-flex items-center rounded-full border border-[var(--tag-border)] bg-[var(--tag-bg)] px-[0.58rem] py-[0.28rem] text-[0.8rem] font-bold leading-none text-[var(--tag-ink)] no-underline transition duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(127,184,255,0.68)]"
+               href="{{ .RelPermalink }}">#{{ .LinkTitle }}</a>
             {{ end }}
-        </header>
-
-        {{ if $imageURL }}
-        <figure class="mx-auto mb-[1.3rem] max-w-[94ch] overflow-hidden rounded-xl border border-[var(--line)]">
-            <img class="block h-full w-full object-cover" src="{{ $imageURL }}" alt="" loading="lazy"/>
-        </figure>
+        </p>
         {{ end }}
+    </header>
 
-        <div class="mx-auto max-w-[94ch] text-[var(--muted)] after:block after:clear-both after:content-[''] [&_a]:text-[var(--accent)] [&_a]:underline-offset-2 hover:[&_a]:text-[var(--accent-2)] [&_h2]:mb-[0.8rem] [&_h2]:mt-8 [&_h2]:font-display [&_h2]:text-[1.8rem] [&_h2]:leading-tight [&_h2]:text-[var(--ink-strong)] [&_h3]:mb-[0.8rem] [&_h3]:mt-8 [&_h3]:font-display [&_h3]:text-[1.35rem] [&_h3]:leading-tight [&_h3]:text-[var(--ink-strong)] [&_p]:leading-[1.74] [&_li]:leading-[1.74] [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:border [&_pre]:border-[var(--line)] [&_pre]:bg-[var(--pre-bg)] [&_pre]:p-[0.85rem] [&_blockquote]:my-4 [&_blockquote]:border-l-[3px] [&_blockquote]:border-[var(--accent)] [&_blockquote]:pl-[0.95rem] [&_img]:mx-auto [&_img]:my-[1.1rem] [&_img]:block [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-[10px] [&_img]:border [&_img]:border-[var(--line)] [&_figcaption]:mt-[0.38rem] [&_figcaption]:text-center [&_figcaption]:text-[0.8rem] [&_figcaption]:text-[var(--story-meta)] [&_p_code]:rounded-md [&_p_code]:border [&_p_code]:border-[color:rgba(127,184,255,0.32)] [&_p_code]:bg-[color:rgba(127,184,255,0.13)] [&_p_code]:px-[0.34rem] [&_p_code]:py-[0.1rem] [&_p_code]:font-mono [&_li_code]:rounded-md [&_li_code]:border [&_li_code]:border-[color:rgba(127,184,255,0.32)] [&_li_code]:bg-[color:rgba(127,184,255,0.13)] [&_li_code]:px-[0.34rem] [&_li_code]:py-[0.1rem] [&_li_code]:font-mono [&_.highlight]:my-[1.35rem] [&_.highlight]:overflow-x-auto [&_.highlight]:rounded-[14px] [&_.highlight]:border [&_.highlight]:border-[var(--line)] [&_.highlight]:bg-[#0f1822] [&_.highlight]:shadow-[inset_0_0_0_1px_rgba(127,184,255,0.08)] [&_.highlight_pre]:m-0 [&_.highlight_pre]:border-0 [&_.highlight_pre]:bg-transparent [&_.highlight_pre]:p-4 [&_.highlight_code]:border-0 [&_.highlight_code]:bg-transparent [&_.highlight_code]:p-0 [&_.highlight_code]:font-mono [&_.highlight_code]:text-[0.9rem] [&_.highlight_code]:leading-[1.62]">
-            {{ $contentHTML | safeHTML }}
+    {{ if $imageURL }}
+    <figure class="m-0 mb-[1.3rem] w-full overflow-hidden rounded-xl border border-[var(--line)]">
+        <img class="block h-auto w-full object-cover" src="{{ $imageURL }}" alt="" loading="lazy"/>
+    </figure>
+    {{ end }}
+
+    <div>
+        <div class="min-w-0">
+            <div class="blog-prose mx-auto max-w-[94ch] text-[var(--muted)] after:block after:clear-both after:content-[''] [&_a]:text-[var(--accent)] [&_a]:underline-offset-2 hover:[&_a]:text-[var(--accent-2)] [&_h2]:mb-[0.8rem] [&_h2]:mt-8 [&_h2]:font-display [&_h2]:text-[1.8rem] [&_h2]:leading-tight [&_h2]:text-[var(--ink-strong)] [&_h3]:mb-[0.8rem] [&_h3]:mt-8 [&_h3]:font-display [&_h3]:text-[1.35rem] [&_h3]:leading-tight [&_h3]:text-[var(--ink-strong)] [&_p]:leading-[1.74] [&_li]:leading-[1.74] [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:border [&_pre]:border-[var(--line)] [&_pre]:bg-[var(--pre-bg)] [&_pre]:p-[0.85rem] [&_blockquote]:my-4 [&_blockquote]:border-l-[3px] [&_blockquote]:border-[var(--accent)] [&_blockquote]:pl-[0.95rem] [&_img]:mx-auto [&_img]:my-[1.1rem] [&_img]:block [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-[10px] [&_img]:border [&_img]:border-[var(--line)] [&_figcaption]:mt-[0.38rem] [&_figcaption]:text-center [&_figcaption]:text-[0.8rem] [&_figcaption]:text-[var(--story-meta)] [&_p_code]:rounded-md [&_p_code]:border [&_p_code]:border-[color:rgba(127,184,255,0.32)] [&_p_code]:bg-[color:rgba(127,184,255,0.13)] [&_p_code]:px-[0.34rem] [&_p_code]:py-[0.1rem] [&_p_code]:font-mono [&_li_code]:rounded-md [&_li_code]:border [&_li_code]:border-[color:rgba(127,184,255,0.32)] [&_li_code]:bg-[color:rgba(127,184,255,0.13)] [&_li_code]:px-[0.34rem] [&_li_code]:py-[0.1rem] [&_li_code]:font-mono [&_.highlight]:my-[1.35rem] [&_.highlight]:overflow-x-auto [&_.highlight]:rounded-[14px] [&_.highlight]:border [&_.highlight]:border-[var(--line)] [&_.highlight]:bg-[#0f1822] [&_.highlight]:shadow-[inset_0_0_0_1px_rgba(127,184,255,0.08)] [&_.highlight_pre]:m-0 [&_.highlight_pre]:border-0 [&_.highlight_pre]:bg-transparent [&_.highlight_pre]:p-4 [&_.highlight_code]:border-0 [&_.highlight_code]:bg-transparent [&_.highlight_code]:p-0 [&_.highlight_code]:font-mono [&_.highlight_code]:text-[0.9rem] [&_.highlight_code]:leading-[1.62]">
+                {{ $contentHTML | safeHTML }}
+            </div>
+
+            {{ if $showBottomAd }}
+            {{ partial "ad-block.html" (dict
+                "adClient" $adClient
+                "adSlot" $adSlot
+                "adFormat" $adFormat
+                "adResponsive" $adResponsive
+                "containerClass" "mx-auto mt-8 max-w-[94ch] rounded-xl border border-[var(--line)] bg-[image:var(--surface)] p-4 [box-shadow:var(--shadow)]"
+            ) }}
+            {{ end }}
         </div>
-
-        {{ if $showBottomAd }}
-        {{ partial "ad-block.html" (dict
-            "adClient" $adClient
-            "adSlot" $adSlot
-            "adFormat" $adFormat
-            "adResponsive" $adResponsive
-            "containerClass" "mx-auto mt-8 max-w-[94ch] rounded-xl border border-[var(--line)] bg-[image:var(--surface)] p-4 [box-shadow:var(--shadow)]"
-        ) }}
-        {{ end }}
     </div>
 </article>
+{{ if $hasTOC }}
+<aside class="mt-6 lg:col-start-2 lg:row-start-1 lg:mt-0 lg:ml-6 lg:w-[220px] lg:self-start lg:sticky lg:top-24">
+    <div>
+        <details class="group overflow-hidden rounded-xl border border-[var(--line)] bg-[image:var(--surface)] [box-shadow:var(--shadow)]"{{ if $tocOpen }} open{{ end }}>
+            <summary class="cursor-pointer list-none px-4 py-3 font-mono text-[0.78rem] font-bold uppercase tracking-[0.09em] text-[var(--accent)] marker:content-none">
+                Table Of Contents
+                <span class="ml-2 inline-block transition-transform duration-200 group-open:rotate-90">›</span>
+            </summary>
+            <div class="border-t border-[var(--line)] px-4 py-3">
+                <div class="toc-scroll-region max-h-[68vh] overflow-auto pr-1 text-[0.92rem] [&_ul]:m-0 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-1 [&_a]:text-[var(--accent)] [&_a]:underline-offset-2 hover:[&_a]:text-[var(--accent-2)]">
+                    {{ $tocHTML | safeHTML }}
+                </div>
+            </div>
+        </details>
+    </div>
+</aside>
+{{ end }}
+</div>
+{{ partial "image-lightbox.html" (dict "scopeSelector" ".js-lightbox-scope") }}
 {{ end }}

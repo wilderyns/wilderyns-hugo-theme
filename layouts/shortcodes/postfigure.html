@@ -10,9 +10,9 @@
 {{- $sizeClass := "md:max-w-[min(44%,360px)]" -}}
 
 {{- if eq $side "left" -}}
-{{- $sideClass = "md:float-left md:mr-[1.15rem] md:mb-[0.95rem] md:mt-[0.35rem]" -}}
+{{- $sideClass = "md:float-left md:ml-[0.35rem] md:mr-[1.15rem] md:mb-[0.95rem] md:mt-[0.35rem]" -}}
 {{- else if eq $side "right" -}}
-{{- $sideClass = "md:float-right md:ml-[1.15rem] md:mb-[0.95rem] md:mt-[0.35rem]" -}}
+{{- $sideClass = "md:float-right md:mr-[0.35rem] md:ml-[1.15rem] md:mb-[0.95rem] md:mt-[0.35rem]" -}}
 {{- end -}}
 
 {{- if eq $size "sm" -}}

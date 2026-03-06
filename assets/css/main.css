@@ -21,6 +21,9 @@
         --button-bg: linear-gradient(120deg, rgba(73, 208, 196, 0.2), rgba(127, 184, 255, 0.2));
         --button-border: rgba(73, 208, 196, 0.44);
         --button-ink: #e8fdff;
+        --theme-toggle-bg: linear-gradient(120deg, rgba(73, 208, 196, 0.24), rgba(127, 184, 255, 0.22));
+        --theme-toggle-border: rgba(127, 184, 255, 0.52);
+        --theme-toggle-ink: #f4fbff;
         --social-bg: rgba(9, 16, 24, 0.55);
         --social-border: rgba(127, 184, 255, 0.28);
         --social-ink: #dff7ff;
@@ -65,6 +68,9 @@
         --button-bg: linear-gradient(120deg, rgba(14, 139, 134, 0.12), rgba(47, 120, 207, 0.12));
         --button-border: rgba(14, 139, 134, 0.34);
         --button-ink: #0f3658;
+        --theme-toggle-bg: linear-gradient(120deg, rgba(255, 255, 255, 0.96), rgba(236, 246, 255, 0.94));
+        --theme-toggle-border: rgba(35, 66, 96, 0.42);
+        --theme-toggle-ink: #102b46;
         --social-bg: rgba(255, 255, 255, 0.9);
         --social-border: rgba(47, 120, 207, 0.24);
         --social-ink: #15375a;
@@ -147,6 +153,52 @@
 
     .career-scroll-progress {
         transition: width 0.18s ease-out;
+    }
+
+    .blog-prose table {
+        clear: both;
+        width: 100%;
+        margin: 1.25rem 0;
+        border-collapse: collapse;
+        table-layout: auto;
+    }
+
+    .blog-prose th,
+    .blog-prose td {
+        border: 1px solid var(--line);
+        padding: 0.58rem 0.72rem;
+        vertical-align: top;
+        text-align: left;
+    }
+
+    .blog-prose th {
+        font-weight: 600;
+        color: var(--ink-strong);
+        background: rgba(127, 184, 255, 0.14);
+    }
+
+    .blog-prose tbody tr:nth-child(even) td {
+        background: rgba(127, 184, 255, 0.04);
+    }
+
+    .toc-scroll-region {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(127, 184, 255, 0.42) transparent;
+    }
+
+    .toc-scroll-region::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .toc-scroll-region::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .toc-scroll-region::-webkit-scrollbar-thumb {
+        border: 1px solid transparent;
+        border-radius: 999px;
+        background-clip: padding-box;
+        background: rgba(127, 184, 255, 0.52);
     }
 
     @media (min-width: 1024px) {
