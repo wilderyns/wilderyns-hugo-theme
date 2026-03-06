@@ -10,8 +10,12 @@
 {{- end -}}
 {{- if $resource -}}
 {{- $result = $resource.RelPermalink -}}
+{{- else if or (hasPrefix $image "http://") (hasPrefix $image "https://") (hasPrefix $image "//") -}}
+{{- $result = $image -}}
 {{- else if hasPrefix $image "/" -}}
 {{- $result = relURL (strings.TrimPrefix "/" $image) -}}
+{{- else if and $page.File $page.File.Dir -}}
+{{- $result = relURL (path.Join $page.File.Dir $image) -}}
 {{- else -}}
 {{- $result = $image -}}
 {{- end -}}
