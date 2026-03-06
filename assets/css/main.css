@@ -201,6 +201,27 @@
         background: rgba(127, 184, 255, 0.52);
     }
 
+    .home-activity-value a {
+        color: var(--accent-2);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .home-activity-value a:hover {
+        text-decoration: underline;
+    }
+
+    .home-activity-avatar {
+        width: 1.55rem;
+        height: 1.55rem;
+        margin-right: 0.45rem;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        object-fit: cover;
+        vertical-align: -0.35rem;
+        background: rgba(127, 184, 255, 0.12);
+    }
+
     @media (min-width: 1024px) {
         .career-scroll-region {
             scrollbar-width: thin;

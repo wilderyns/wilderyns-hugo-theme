@@ -4,7 +4,7 @@
 {{- $profile := site.Data.profile -}}
 {{- $aboutTitle := site.Params.homepage.aboutTitle | default "About Me" -}}
 {{- $aboutText := site.Params.homepage.aboutText | default site.Params.author.statement -}}
-{{- $aboutItems := site.Params.homepage.aboutItems | default $profile.summary -}}
+{{- $wuu2URL := site.Params.integrations.wuu2.url | default "" -}}
 
 <section
         class="animate-reveal motion-reduce:animate-none mx-auto mt-[1.1rem] grid w-full max-w-[1160px] gap-4 px-[1.1rem] lg:grid-cols-[1.5fr_1fr]">
@@ -27,17 +27,40 @@
             {{ partial "social-links.html" (dict "featuredOnly" true "variant" "featured") }}
         </div>
     </div>
-    <aside class="rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] p-[1.4rem] [box-shadow:var(--shadow)]">
+    <aside id="homepage-activity-panel"
+           data-wuu2-url="{{ $wuu2URL }}"
+           class="rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] p-[1.4rem] [box-shadow:var(--shadow)]">
         <h2 class="mb-[0.25rem] mt-0 font-display text-[1.25rem] text-[var(--ink-strong)]">{{ $aboutTitle }}</h2>
         <p class="m-0 text-[var(--muted)]">{{ $aboutText }}</p>
-        <ul class="m-0 mt-[0.9rem] list-none p-0">
-            {{ range $aboutItems }}
-            <li class="grid gap-[0.2rem] border-t border-[color:rgba(127,184,255,0.28)] py-[0.7rem]">
-                <strong class="text-[0.84rem] uppercase tracking-[0.02em] text-[var(--panel-strong)]">{{ .title
-                    }}</strong>
-                <span class="text-[var(--muted)]">{{ .value }}</span>
+        <ul class="m-0 mt-[0.9rem] grid list-none gap-[0.7rem] p-0">
+            <li class="rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[color:rgba(127,184,255,0.06)] px-[0.8rem] py-[0.7rem]">
+                <div class="flex items-center justify-between gap-2">
+                    <strong class="text-[0.75rem] uppercase tracking-[0.08em] text-[var(--panel-strong)]">Last listened
+                        to</strong>
+                    <span data-activity-source="listened"
+                          class="rounded-full border border-[color:rgba(73,208,196,0.4)] bg-[color:rgba(73,208,196,0.16)] px-2 py-[0.1rem] text-[0.67rem] font-semibold uppercase tracking-[0.05em] text-[var(--ink-strong)]">Pending</span>
+                </div>
+                <p data-activity-value="listened" class="home-activity-value m-0 mt-[0.32rem] text-[var(--muted)]">
+                    Coming soon</p>
             </li>
-            {{ end }}
+            <li class="rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[color:rgba(127,184,255,0.06)] px-[0.8rem] py-[0.7rem]">
+                <div class="flex items-center justify-between gap-2">
+                    <strong class="text-[0.75rem] uppercase tracking-[0.08em] text-[var(--panel-strong)]">Last watched</strong>
+                    <span data-activity-source="watched"
+                          class="rounded-full border border-[color:rgba(73,208,196,0.4)] bg-[color:rgba(73,208,196,0.16)] px-2 py-[0.1rem] text-[0.67rem] font-semibold uppercase tracking-[0.05em] text-[var(--ink-strong)]">Pending</span>
+                </div>
+                <p data-activity-value="watched" class="home-activity-value m-0 mt-[0.32rem] text-[var(--muted)]">
+                    Coming soon</p>
+            </li>
+            <li class="rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[color:rgba(127,184,255,0.06)] px-[0.8rem] py-[0.7rem]">
+                <div class="flex items-center justify-between gap-2">
+                    <strong class="text-[0.75rem] uppercase tracking-[0.08em] text-[var(--panel-strong)]">Last played</strong>
+                    <span data-activity-source="played"
+                          class="rounded-full border border-[color:rgba(73,208,196,0.4)] bg-[color:rgba(73,208,196,0.16)] px-2 py-[0.1rem] text-[0.67rem] font-semibold uppercase tracking-[0.05em] text-[var(--ink-strong)]">Pending</span>
+                </div>
+                <p data-activity-value="played" class="home-activity-value m-0 mt-[0.32rem] text-[var(--muted)]">
+                    Coming soon</p>
+            </li>
         </ul>
     </aside>
 </section>
@@ -102,4 +125,226 @@
         {{ end }}
     </div>
 </section>
+<script>
+    (function () {
+        var panel = document.getElementById("homepage-activity-panel");
+        if (!panel) return;
+
+        var endpoint = (panel.dataset.wuu2Url || "").trim();
+        if (!endpoint) {
+            setActivityText("listened", "Set params.integrations.wuu2.url in hugo.yaml", "Config");
+            setActivityText("watched", "Set params.integrations.wuu2.url in hugo.yaml", "Config");
+            setActivityText("played", "Set params.integrations.wuu2.url in hugo.yaml", "Config");
+            return;
+        }
+
+        function asArray(value) {
+            return Array.isArray(value) ? value : [];
+        }
+
+        function parseTimestamp(value) {
+            var parsed = Date.parse(value || "");
+            return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function pickLatest(items, field) {
+            return asArray(items).reduce(function (best, current) {
+                if (!best) return current;
+                return parseTimestamp(current && current[field]) > parseTimestamp(best && best[field]) ? current : best;
+            }, null);
+        }
+
+        function pad2(value) {
+            var n = Number(value);
+            if (!Number.isFinite(n) || n < 0) return "";
+            return String(Math.floor(n)).padStart(2, "0");
+        }
+
+        function asUrl(value) {
+            if (!value) return "";
+            if (/^https?:\/\//i.test(value)) return value;
+            return "";
+        }
+
+        function imdbUrl(value) {
+            if (!value) return "";
+            if (/^https?:\/\//i.test(value)) return value;
+            return "https://www.imdb.com/title/" + encodeURIComponent(String(value)) + "/";
+        }
+
+        function sourceEl(key) {
+            return panel.querySelector("[data-activity-source=\"" + key + "\"]");
+        }
+
+        function valueEl(key) {
+            return panel.querySelector("[data-activity-value=\"" + key + "\"]");
+        }
+
+        function setActivityText(key, text, source) {
+            var sourceNode = sourceEl(key);
+            var valueNode = valueEl(key);
+            if (!valueNode) return;
+            if (sourceNode) sourceNode.textContent = source || "None";
+            valueNode.textContent = text;
+        }
+
+        function setActivityNodes(key, nodes, source) {
+            var sourceNode = sourceEl(key);
+            var valueNode = valueEl(key);
+            if (!valueNode) return;
+            if (sourceNode) sourceNode.textContent = source || "None";
+            valueNode.textContent = "";
+            nodes.forEach(function (node) {
+                valueNode.appendChild(node);
+            });
+        }
+
+        function linkOrText(text, href) {
+            if (href) {
+                var anchor = document.createElement("a");
+                anchor.href = href;
+                anchor.textContent = text;
+                anchor.target = "_blank";
+                anchor.rel = "noopener noreferrer";
+                return anchor;
+            }
+            return document.createTextNode(text);
+        }
+
+        function chooseMusic(data) {
+            var apple = pickLatest(data && data.AppleMusic, "LastChange");
+            var spotify = pickLatest(data && data.Spotify, "LastChange");
+            var appleTime = parseTimestamp(apple && apple.LastChange);
+            var spotifyTime = parseTimestamp(spotify && spotify.LastChange);
+
+            if (!apple && !spotify) return null;
+            if (apple && !spotify) return {source: "Apple Music", item: apple};
+            if (!apple && spotify) return {source: "Spotify", item: spotify};
+            return appleTime >= spotifyTime ? {source: "Apple Music", item: apple} : {source: "Spotify", item: spotify};
+        }
+
+        function choosePlayed(data) {
+            var wow = pickLatest(data && data.Wow, "LastCheck");
+            var steam = pickLatest(data && data.Steam, "LastChange");
+            var wowTime = parseTimestamp(wow && wow.LastCheck);
+            var steamTime = parseTimestamp(steam && steam.LastChange);
+
+            if (wow && wow.Online) return {source: "WoW", service: "wow", item: wow};
+            if (!wow && !steam) return null;
+            if (wow && !steam) return {source: "WoW", service: "wow", item: wow};
+            if (!wow && steam) return {source: "Steam", service: "steam", item: steam};
+            return steamTime >= wowTime
+                ? {source: "Steam", service: "steam", item: steam}
+                : {source: "WoW", service: "wow", item: wow};
+        }
+
+        function renderMusic(data) {
+            var selected = chooseMusic(data);
+            if (!selected || !selected.item) {
+                setActivityText("listened", "No recent track found.", "None");
+                return;
+            }
+
+            var item = selected.item;
+            var song = item.Song || "Unknown track";
+            var artist = item.Artist || "Unknown artist";
+            var album = item.Album || "Unknown album";
+            var nodes = [
+                linkOrText(song, asUrl(item.SongLink)),
+                document.createTextNode(" by "),
+                linkOrText(artist, asUrl(item.ArtistLink)),
+                document.createTextNode(" on "),
+                linkOrText(album, asUrl(item.AlbumLink))
+            ];
+            setActivityNodes("listened", nodes, selected.source);
+        }
+
+        function renderWatched(data) {
+            var watched = pickLatest(data && data.Trakt, "WatchedAt");
+            if (!watched) {
+                setActivityText("watched", "No recent watch found.", "Trakt");
+                return;
+            }
+
+            var title = watched.Title || "Unknown title";
+            var type = String(watched.Type || "").toLowerCase();
+            var season = pad2(watched.Season);
+            var episode = pad2(watched.Episode);
+            var episodeTag = season && episode && type !== "movie" ? " (S" + season + "E" + episode + ")" : "";
+            var imdb = imdbUrl(watched.IMDB);
+            var nodes = [
+                document.createTextNode(title + episodeTag)
+            ];
+
+            if (imdb) {
+                nodes.push(document.createTextNode(" "));
+                nodes.push(linkOrText("IMDb", imdb));
+            }
+
+            setActivityNodes("watched", nodes, "Trakt");
+        }
+
+        function renderPlayed(data) {
+            var selected = choosePlayed(data);
+            if (!selected || !selected.item) {
+                setActivityText("played", "No recent game activity found.", "None");
+                return;
+            }
+
+            if (selected.service === "steam") {
+                var steam = selected.item;
+                var game = steam.Game || "Unknown game";
+                var hours = Number(steam.HoursPlayed);
+                var hoursText = Number.isFinite(hours) ? " \u00b7 " + hours.toFixed(1) + "h played" : "";
+                var steamNodes = [linkOrText(game, asUrl(steam.GameLink))];
+                if (hoursText) steamNodes.push(document.createTextNode(hoursText));
+                setActivityNodes("played", steamNodes, "Steam");
+                return;
+            }
+
+            var wow = selected.item;
+            var character = wow.Character || "Unknown character";
+            var realm = wow.Realm || "Unknown realm";
+            var location = wow.Location || "Unknown location";
+            var wowText = wow.Online
+                ? character + " (" + realm + ") in " + location
+                : character + " (" + realm + ") is offline";
+            var wowNodes = [];
+            var avatarUrl = asUrl(wow.AvatarURL);
+
+            if (avatarUrl) {
+                var avatar = document.createElement("img");
+                avatar.src = avatarUrl;
+                avatar.alt = character + " avatar";
+                avatar.className = "home-activity-avatar";
+                avatar.loading = "lazy";
+                wowNodes.push(avatar);
+            }
+
+            wowNodes.push(document.createTextNode(wowText));
+            setActivityNodes("played", wowNodes, "WoW");
+        }
+
+        function refreshActivity() {
+            fetch(endpoint, {headers: {"Accept": "application/json"}})
+                .then(function (response) {
+                    if (!response.ok) throw new Error("HTTP " + response.status);
+                    return response.json();
+                })
+                .then(function (data) {
+                    renderMusic(data || {});
+                    renderWatched(data || {});
+                    renderPlayed(data || {});
+                })
+                .catch(function () {
+                    setActivityText("listened", "Activity feed unavailable right now.", "Offline");
+                    setActivityText("watched", "Activity feed unavailable right now.", "Offline");
+                    setActivityText("played", "Activity feed unavailable right now.", "Offline");
+                });
+        }
+
+        refreshActivity();
+        window.setInterval(refreshActivity, 60000);
+    })();
+</script>
 {{ end }}
