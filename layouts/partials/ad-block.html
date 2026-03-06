@@ -1,0 +1,16 @@
+{{- $adClient := .adClient -}}
+{{- $adSlot := .adSlot -}}
+{{- $adFormat := .adFormat | default "auto" -}}
+{{- $adResponsive := .adResponsive | default "true" -}}
+{{- $containerClass := .containerClass | default "rounded-xl border border-[var(--line)] bg-[image:var(--surface)] p-4 [box-shadow:var(--shadow)]" -}}
+
+<section class="{{ $containerClass }}">
+    <p class="mb-2 mt-0 font-mono text-[0.72rem] uppercase tracking-[0.08em] text-[var(--story-meta)]">
+        Advertisement</p>
+    <ins class="adsbygoogle block w-full overflow-hidden" data-ad-client="{{ $adClient }}"
+         data-ad-slot="{{ $adSlot }}" data-ad-format="{{ $adFormat }}"
+         data-full-width-responsive="{{ $adResponsive }}"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+</section>
