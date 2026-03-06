@@ -45,9 +45,11 @@
         };
 
         const openLightbox = (img) => {
-            overlayImage.src = img.currentSrc || img.src;
+            const fullSrc = img.getAttribute('data-lightbox-src') || img.currentSrc || img.src;
+            const caption = img.getAttribute('data-lightbox-caption') || img.alt || '';
+            overlayImage.src = fullSrc;
             overlayImage.alt = img.alt || '';
-            overlayCaption.textContent = img.alt || '';
+            overlayCaption.textContent = caption;
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
             document.body.style.overflow = 'hidden';

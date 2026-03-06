@@ -160,6 +160,50 @@
             return String(Math.floor(n)).padStart(2, "0");
         }
 
+        function formatDateTime(value) {
+            var ts = parseTimestamp(value);
+            if (!ts) return "";
+            try {
+                return new Intl.DateTimeFormat(undefined, {
+                    dateStyle: "medium",
+                    timeStyle: "short"
+                }).format(new Date(ts));
+            } catch (e) {
+                return "";
+            }
+        }
+
+        function timeAgo(value) {
+            var ts = parseTimestamp(value);
+            if (!ts) return "";
+
+            var delta = Date.now() - ts;
+            if (!Number.isFinite(delta) || delta < 0) delta = 0;
+
+            var monthMs = 30 * 24 * 60 * 60 * 1000;
+            var dayMs = 24 * 60 * 60 * 1000;
+            var hourMs = 60 * 60 * 1000;
+            var minuteMs = 60 * 1000;
+
+            if (delta >= monthMs) {
+                var months = Math.floor(delta / monthMs);
+                return months + " month" + (months === 1 ? "" : "s") + " ago";
+            }
+            if (delta >= dayMs) {
+                var days = Math.floor(delta / dayMs);
+                return days + " day" + (days === 1 ? "" : "s") + " ago";
+            }
+            if (delta >= hourMs) {
+                var hours = Math.floor(delta / hourMs);
+                return hours + " hour" + (hours === 1 ? "" : "s") + " ago";
+            }
+            if (delta >= minuteMs) {
+                var minutes = Math.floor(delta / minuteMs);
+                return minutes + " minute" + (minutes === 1 ? "" : "s") + " ago";
+            }
+            return "just now";
+        }
+
         function asUrl(value) {
             if (!value) return "";
             if (/^https?:\/\//i.test(value)) return value;
@@ -211,6 +255,34 @@
             return document.createTextNode(text);
         }
 
+        function iconNode(icon, label) {
+            var span = document.createElement("span");
+            span.className = "home-activity-icon";
+            span.textContent = icon;
+            span.setAttribute("aria-label", label);
+            span.title = label;
+            return span;
+        }
+
+        function withSubtext(mainNodes, subtext) {
+            var nodes = [];
+            var main = document.createElement("span");
+            main.className = "home-activity-main";
+            mainNodes.forEach(function (node) {
+                main.appendChild(node);
+            });
+            nodes.push(main);
+
+            if (subtext) {
+                var sub = document.createElement("span");
+                sub.className = "home-activity-subtext";
+                sub.textContent = subtext;
+                nodes.push(sub);
+            }
+
+            return nodes;
+        }
+
         function chooseMusic(data) {
             var apple = pickLatest(data && data.AppleMusic, "LastChange");
             var spotify = pickLatest(data && data.Spotify, "LastChange");
@@ -226,16 +298,11 @@
         function choosePlayed(data) {
             var wow = pickLatest(data && data.Wow, "LastCheck");
             var steam = pickLatest(data && data.Steam, "LastChange");
-            var wowTime = parseTimestamp(wow && wow.LastCheck);
-            var steamTime = parseTimestamp(steam && steam.LastChange);
 
             if (wow && wow.Online) return {source: "WoW", service: "wow", item: wow};
-            if (!wow && !steam) return null;
-            if (wow && !steam) return {source: "WoW", service: "wow", item: wow};
-            if (!wow && steam) return {source: "Steam", service: "steam", item: steam};
-            return steamTime >= wowTime
-                ? {source: "Steam", service: "steam", item: steam}
-                : {source: "WoW", service: "wow", item: wow};
+            if (wow) return {source: "WoW", service: "wow", item: wow};
+            if (steam) return {source: "Steam", service: "steam", item: steam};
+            return null;
         }
 
         function renderMusic(data) {
@@ -272,16 +339,24 @@
             var episode = pad2(watched.Episode);
             var episodeTag = season && episode && type !== "movie" ? " (S" + season + "E" + episode + ")" : "";
             var imdb = imdbUrl(watched.IMDB);
-            var nodes = [
-                document.createTextNode(title + episodeTag)
-            ];
+            var watchedWhen = formatDateTime(watched.WatchedAt);
+            var watchedAgo = timeAgo(watched.WatchedAt);
+            var watchedSubtext = "";
 
-            if (imdb) {
-                nodes.push(document.createTextNode(" "));
-                nodes.push(linkOrText("IMDb", imdb));
+            if (watchedWhen && watchedAgo) {
+                watchedSubtext = "Watched " + watchedAgo + " · " + watchedWhen;
+            } else if (watchedWhen) {
+                watchedSubtext = "Watched " + watchedWhen;
             }
 
-            setActivityNodes("watched", nodes, "Trakt");
+            var titleWithEpisode = title + episodeTag;
+            var watchedNodes = [
+                iconNode(type === "movie" ? "🍿" : "📺", type === "movie" ? "Movie" : "TV Show"),
+                document.createTextNode(" "),
+                linkOrText(titleWithEpisode, imdb)
+            ];
+
+            setActivityNodes("watched", withSubtext(watchedNodes, watchedSubtext), "Trakt");
         }
 
         function renderPlayed(data) {
@@ -295,10 +370,27 @@
                 var steam = selected.item;
                 var game = steam.Game || "Unknown game";
                 var hours = Number(steam.HoursPlayed);
-                var hoursText = Number.isFinite(hours) ? " \u00b7 " + hours.toFixed(1) + "h played" : "";
+                var hoursText = Number.isFinite(hours) ? hours.toFixed(1) + "h played" : "";
+                var steamAgo = timeAgo(steam.LastChange);
+                var steamWhen = formatDateTime(steam.LastChange);
+                var steamSubtext = "";
+
+                if (steamAgo && steamWhen) {
+                    steamSubtext = "Last played " + steamAgo + " · " + steamWhen;
+                } else if (steamAgo) {
+                    steamSubtext = "Last played " + steamAgo;
+                } else if (steamWhen) {
+                    steamSubtext = "Last played " + steamWhen;
+                }
+
+                if (hoursText && steamSubtext) {
+                    steamSubtext = steamSubtext + " · " + hoursText;
+                } else if (hoursText) {
+                    steamSubtext = hoursText;
+                }
+
                 var steamNodes = [linkOrText(game, asUrl(steam.GameLink))];
-                if (hoursText) steamNodes.push(document.createTextNode(hoursText));
-                setActivityNodes("played", steamNodes, "Steam");
+                setActivityNodes("played", withSubtext(steamNodes, steamSubtext), "Steam");
                 return;
             }
 
@@ -306,11 +398,17 @@
             var character = wow.Character || "Unknown character";
             var realm = wow.Realm || "Unknown realm";
             var location = wow.Location || "Unknown location";
-            var wowText = wow.Online
-                ? character + " (" + realm + ") in " + location
-                : character + " (" + realm + ") is offline";
-            var wowNodes = [];
+            var wowSuffixText = wow.Online
+                ? " (" + realm + ") in " + location
+                : " (" + realm + ")";
+            var wowSubtext = "Online now";
+            var lastOnlineAgo = timeAgo(wow.LastOnline || wow.LastCheck);
+            if (!wow.Online) {
+                wowSubtext = lastOnlineAgo ? "Last online: " + lastOnlineAgo : "Last online: unknown";
+            }
+            var wowMainNodes = [];
             var avatarUrl = asUrl(wow.AvatarURL);
+            var armoryUrl = asUrl(wow.ArmoryURL);
 
             if (avatarUrl) {
                 var avatar = document.createElement("img");
@@ -318,11 +416,18 @@
                 avatar.alt = character + " avatar";
                 avatar.className = "home-activity-avatar";
                 avatar.loading = "lazy";
-                wowNodes.push(avatar);
+                avatar.style.cursor = "zoom-in";
+                var insetUrl = asUrl(wow.InsetURL);
+                if (insetUrl || avatarUrl) {
+                    avatar.setAttribute("data-lightbox-src", insetUrl || avatarUrl);
+                    avatar.setAttribute("data-lightbox-caption", character + " · " + realm);
+                }
+                wowMainNodes.push(avatar);
             }
 
-            wowNodes.push(document.createTextNode(wowText));
-            setActivityNodes("played", wowNodes, "WoW");
+            wowMainNodes.push(linkOrText(character, armoryUrl));
+            wowMainNodes.push(document.createTextNode(wowSuffixText));
+            setActivityNodes("played", withSubtext(wowMainNodes, wowSubtext), "WoW");
         }
 
         function refreshActivity() {
@@ -347,4 +452,5 @@
         window.setInterval(refreshActivity, 60000);
     })();
 </script>
+{{ partial "image-lightbox.html" (dict "scopeSelector" "#homepage-activity-panel") }}
 {{ end }}

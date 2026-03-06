@@ -211,6 +211,26 @@
         text-decoration: underline;
     }
 
+    .home-activity-main {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .home-activity-subtext {
+        display: block;
+        margin-top: 0.18rem;
+        font-size: 0.77rem;
+        color: var(--story-meta);
+        line-height: 1.35;
+    }
+
+    .home-activity-icon {
+        display: inline-block;
+        margin-right: 0.15rem;
+        line-height: 1;
+    }
+
     .home-activity-avatar {
         width: 1.55rem;
         height: 1.55rem;
