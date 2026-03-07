@@ -210,6 +210,17 @@
             return "";
         }
 
+        function asBoolean(value) {
+            if (typeof value === "boolean") return value;
+            if (typeof value === "number") return value === 1;
+            if (typeof value === "string") {
+                var normalized = value.trim().toLowerCase();
+                if (normalized === "true" || normalized === "1" || normalized === "yes" || normalized === "online") return true;
+                if (normalized === "false" || normalized === "0" || normalized === "no" || normalized === "offline" || normalized === "") return false;
+            }
+            return false;
+        }
+
         function imdbUrl(value) {
             if (!value) return "";
             if (/^https?:\/\//i.test(value)) return value;
@@ -296,10 +307,11 @@
         }
 
         function choosePlayed(data) {
-            var wow = pickLatest(data && data.Wow, "LastCheck");
+            var wow = pickLatest(data && data.Wow, "LastModified");
             var steam = pickLatest(data && data.Steam, "LastChange");
+            var wowOnline = wow ? asBoolean(wow.Online) : false;
 
-            if (wow && wow.Online) return {source: "WoW", service: "wow", item: wow};
+            if (wow && wowOnline) return {source: "WoW", service: "wow", item: wow};
             if (wow) return {source: "WoW", service: "wow", item: wow};
             if (steam) return {source: "Steam", service: "steam", item: steam};
             return null;
@@ -395,15 +407,17 @@
             }
 
             var wow = selected.item;
+            var wowOnline = asBoolean(wow.Online);
             var character = wow.Character || "Unknown character";
             var realm = wow.Realm || "Unknown realm";
             var location = wow.Location || "Unknown location";
-            var wowSuffixText = wow.Online
+            var wowSuffixText = wowOnline
                 ? "(" + realm + ") in " + location
                 : "(" + realm + ")";
             var wowSubtext = "Online now";
-            var lastOnlineAgo = timeAgo(wow.LastOnline || wow.LastCheck);
-            if (!wow.Online) {
+            var lastOnlineValue = wow.LastModified || wow.LastOnline;
+            var lastOnlineAgo = timeAgo(lastOnlineValue);
+            if (!wowOnline) {
                 wowSubtext = lastOnlineAgo ? "Last online: " + lastOnlineAgo : "Last online: unknown";
             }
             var wowMainNodes = [];
