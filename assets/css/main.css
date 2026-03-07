@@ -242,6 +242,10 @@
         background: rgba(127, 184, 255, 0.12);
     }
 
+    .home-activity-suffix {
+        margin-left: 0.2rem;
+    }
+
     @media (min-width: 1024px) {
         .career-scroll-region {
             scrollbar-width: thin;

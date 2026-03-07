@@ -399,8 +399,8 @@
             var realm = wow.Realm || "Unknown realm";
             var location = wow.Location || "Unknown location";
             var wowSuffixText = wow.Online
-                ? " (" + realm + ") in " + location
-                : " (" + realm + ")";
+                ? "(" + realm + ") in " + location
+                : "(" + realm + ")";
             var wowSubtext = "Online now";
             var lastOnlineAgo = timeAgo(wow.LastOnline || wow.LastCheck);
             if (!wow.Online) {
@@ -426,7 +426,10 @@
             }
 
             wowMainNodes.push(linkOrText(character, armoryUrl));
-            wowMainNodes.push(document.createTextNode(wowSuffixText));
+            var wowSuffix = document.createElement("span");
+            wowSuffix.className = "home-activity-suffix";
+            wowSuffix.textContent = wowSuffixText;
+            wowMainNodes.push(wowSuffix);
             setActivityNodes("played", withSubtext(wowMainNodes, wowSubtext), "WoW");
         }
 
