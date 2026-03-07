@@ -1,12 +1,6 @@
 {{ define "main" }}
 {{- $image := .Params.featured_image | default .Params.image -}}
 {{- $imageURL := partial "resolve-image.html" (dict "page" . "image" $image) -}}
-{{- $cfAnalytics := site.Params.integrations.cloudflareWebAnalytics -}}
-{{- $cfEnabled := and $cfAnalytics (or (eq (printf "%v" $cfAnalytics.enabled) "true") (eq (printf "%v" $cfAnalytics.enabled) "1")) -}}
-{{- $cfToken := "" -}}
-{{- if $cfAnalytics -}}
-{{- $cfToken = $cfAnalytics.token | default "" -}}
-{{- end -}}
 {{- $googleAds := site.Params.integrations.googleAds -}}
 {{- $adsEnabled := and $googleAds (or (eq (printf "%v" $googleAds.enabled) "true") (eq (printf "%v" $googleAds.enabled) "1")) -}}
 {{- $adClient := "" -}}
@@ -75,11 +69,6 @@
 {{- $hasTOC := and $showTOC $tocHTML -}}
 {{- $dateISO := .Date.Format "2006-01-02" -}}
 {{- $dateLong := .Date.Format "January 2, 2006" -}}
-
-{{ if and $cfEnabled $cfToken }}
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js"
-        data-cf-beacon='{"token":"{{ $cfToken }}"}'></script>
-{{ end }}
 {{ if $showAnyAd }}
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ $adClient }}"
         crossorigin="anonymous"></script>

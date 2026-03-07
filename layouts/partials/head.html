@@ -4,6 +4,19 @@
 <meta name="description"
       content="{{ with .Description }}{{ . }}{{ else }}{{ with site.Params.author.statement }}{{ . }}{{ else }}Personal website and blog{{ end }}{{ end }}"/>
 <meta name="color-scheme" content="dark light"/>
+{{- $cfAnalytics := site.Params.integrations.cloudflareWebAnalytics -}}
+{{- if and (not $cfAnalytics) site.Params.integrations -}}
+{{- $cfAnalytics = index site.Params.integrations "cloudflarewebanalytics" -}}
+{{- end -}}
+{{- $cfEnabled := and $cfAnalytics (or (eq (printf "%v" $cfAnalytics.enabled) "true") (eq (printf "%v" $cfAnalytics.enabled) "1")) -}}
+{{- $cfToken := "" -}}
+{{- if $cfAnalytics -}}
+{{- $cfToken = $cfAnalytics.token | default "" -}}
+{{- end -}}
+{{ if and $cfEnabled $cfToken }}
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon='{"token":"{{ $cfToken }}"}'></script>
+{{ end }}
 {{- $googleAds := site.Params.integrations.googleAds -}}
 {{- $adClient := "" -}}
 {{- if $googleAds -}}
