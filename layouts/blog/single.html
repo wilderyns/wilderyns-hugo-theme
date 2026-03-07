@@ -86,6 +86,23 @@
 {{ end }}
 
 <div class="relative mx-auto mt-[1.2rem] w-full max-w-[1160px] {{ if $hasTOC }}lg:grid lg:grid-cols-[minmax(0,1fr)_0] lg:items-start{{ end }}">
+{{ if $hasTOC }}
+<aside class="mb-6 lg:col-start-2 lg:row-start-1 lg:mb-0 lg:ml-6 lg:w-[220px] lg:self-start lg:sticky lg:top-24">
+    <div>
+        <details class="group overflow-hidden rounded-xl border border-[var(--line)] bg-[image:var(--surface)] [box-shadow:var(--shadow)]"{{ if $tocOpen }} open{{ end }}>
+            <summary class="cursor-pointer list-none px-4 py-3 font-mono text-[0.78rem] font-bold uppercase tracking-[0.09em] text-[var(--accent)] marker:content-none">
+                Table Of Contents
+                <span class="ml-2 inline-block transition-transform duration-200 group-open:rotate-90">›</span>
+            </summary>
+            <div class="border-t border-[var(--line)] px-4 py-3">
+                <div class="toc-scroll-region max-h-[68vh] overflow-auto pr-1 text-[0.92rem] [&_ul]:m-0 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-1 [&_a]:text-[var(--accent)] [&_a]:underline-offset-2 hover:[&_a]:text-[var(--accent-2)]">
+                    {{ $tocHTML | safeHTML }}
+                </div>
+            </div>
+        </details>
+    </div>
+</aside>
+{{ end }}
 <article
         class="js-lightbox-scope animate-reveal motion-reduce:animate-none w-full overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] px-[1.1rem] py-[1.3rem] [box-shadow:var(--shadow)]">
     <header class="mx-auto mb-4 max-w-[96ch]">
@@ -131,23 +148,6 @@
         </div>
     </div>
 </article>
-{{ if $hasTOC }}
-<aside class="mt-6 lg:col-start-2 lg:row-start-1 lg:mt-0 lg:ml-6 lg:w-[220px] lg:self-start lg:sticky lg:top-24">
-    <div>
-        <details class="group overflow-hidden rounded-xl border border-[var(--line)] bg-[image:var(--surface)] [box-shadow:var(--shadow)]"{{ if $tocOpen }} open{{ end }}>
-            <summary class="cursor-pointer list-none px-4 py-3 font-mono text-[0.78rem] font-bold uppercase tracking-[0.09em] text-[var(--accent)] marker:content-none">
-                Table Of Contents
-                <span class="ml-2 inline-block transition-transform duration-200 group-open:rotate-90">›</span>
-            </summary>
-            <div class="border-t border-[var(--line)] px-4 py-3">
-                <div class="toc-scroll-region max-h-[68vh] overflow-auto pr-1 text-[0.92rem] [&_ul]:m-0 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-1 [&_a]:text-[var(--accent)] [&_a]:underline-offset-2 hover:[&_a]:text-[var(--accent-2)]">
-                    {{ $tocHTML | safeHTML }}
-                </div>
-            </div>
-        </details>
-    </div>
-</aside>
-{{ end }}
 </div>
 {{ partial "image-lightbox.html" (dict "scopeSelector" ".js-lightbox-scope") }}
 {{ end }}
