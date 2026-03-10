@@ -8,5 +8,5 @@ features = ["blog", "projects", "career", "responsive"]
 min_version = "0.120.0"
 
 [author]
-name = "Alex Wilde"
-homepage = "https://example.org/"
+name = "Al Wilde"
+homepage = "https://alwilde.com/"
