@@ -148,6 +148,8 @@
             {{- $official := .official_url | default .url -}}
             {{- $credly := .credly_url -}}
             {{- $logoLink := $credly | default $official -}}
+            {{- $issued := .issue_date | default .issued_date | default .issued -}}
+            {{- $expiry := .expiry_date | default .expires_date | default .expiry -}}
             <li class="grid grid-cols-[auto_1fr] place-items-start gap-x-[0.7rem] gap-y-[0.16rem] rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[image:var(--surface)] p-3">
                 {{ with .logo }}
                 {{ if $logoLink }}
@@ -167,6 +169,22 @@
                         {{ end }}
                     </strong>
                     <span class="text-[var(--muted)]">{{ .issuer }} · {{ .status }}</span>
+                    {{ if or $issued $expiry }}
+                    <div class="mt-[0.18rem] flex flex-wrap gap-[0.34rem] text-[0.72rem] leading-none text-[var(--muted)]">
+                        {{ with $issued }}
+                        <span class="inline-flex items-center gap-[0.24rem] rounded-md border border-[color:rgba(127,184,255,0.24)] bg-[color:rgba(127,184,255,0.08)] px-[0.38rem] py-[0.24rem]">
+                            <span class="font-mono text-[0.62rem] font-bold uppercase tracking-[0.07em] text-[var(--warning)]">Issued</span>
+                            <span class="text-[var(--stack-strong)]">{{ . }}</span>
+                        </span>
+                        {{ end }}
+                        {{ with $expiry }}
+                        <span class="inline-flex items-center gap-[0.24rem] rounded-md border border-[color:rgba(127,184,255,0.24)] bg-[color:rgba(127,184,255,0.08)] px-[0.38rem] py-[0.24rem]">
+                            <span class="font-mono text-[0.62rem] font-bold uppercase tracking-[0.07em] text-[var(--warning)]">Expires</span>
+                            <span class="text-[var(--stack-strong)]">{{ . }}</span>
+                        </span>
+                        {{ end }}
+                    </div>
+                    {{ end }}
                     {{ if or $official $credly }}
                     <div class="mt-[0.22rem] flex flex-wrap gap-[0.38rem]">
                         {{ with $official }}
