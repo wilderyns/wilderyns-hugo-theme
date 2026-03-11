@@ -79,79 +79,133 @@
 </section>
 <script>
     (function () {
-        var containers = document.querySelectorAll(".career-scroll-wrap");
-        if (!containers.length) return;
+        function setupCareerScroll() {
+            var containers = document.querySelectorAll(".career-scroll-wrap");
+            if (!containers.length) return;
 
-        function setup(container) {
-            var scroller = container.querySelector("[data-career-scroll]");
-            var controls = container.parentElement.querySelector("[data-career-controls]");
-            var up = controls ? controls.querySelector('[data-career-scroll-btn="up"]') : null;
-            var down = controls ? controls.querySelector('[data-career-scroll-btn="down"]') : null;
-            var progress = controls ? controls.querySelector(".career-scroll-progress") : null;
-            var fadeTop = container.querySelector(".career-scroll-fade-top");
-            var fadeBottom = container.querySelector(".career-scroll-fade-bottom");
-            if (!scroller) return;
+            function setup(container) {
+                var scroller = container.querySelector("[data-career-scroll]");
+                var controls = container.parentElement.querySelector("[data-career-controls]");
+                var up = controls ? controls.querySelector('[data-career-scroll-btn="up"]') : null;
+                var down = controls ? controls.querySelector('[data-career-scroll-btn="down"]') : null;
+                var progress = controls ? controls.querySelector(".career-scroll-progress") : null;
+                var fadeTop = container.querySelector(".career-scroll-fade-top");
+                var fadeBottom = container.querySelector(".career-scroll-fade-bottom");
+                if (!scroller) return;
 
-            function updateScrollUI() {
-                var max = scroller.scrollHeight - scroller.clientHeight;
-                var top = scroller.scrollTop;
-                var hasOverflow = max > 1;
-                var ratio = hasOverflow ? Math.min(1, Math.max(0, top / max)) : 0;
+                function updateScrollUI() {
+                    var max = scroller.scrollHeight - scroller.clientHeight;
+                    var top = scroller.scrollTop;
+                    var hasOverflow = max > 1;
+                    var ratio = hasOverflow ? Math.min(1, Math.max(0, top / max)) : 0;
 
-                if (progress) progress.style.width = (ratio * 100) + "%";
-                if (up) up.disabled = !hasOverflow || top <= 2;
-                if (down) down.disabled = !hasOverflow || top >= max - 2;
+                    if (progress) progress.style.width = (ratio * 100) + "%";
+                    if (up) up.disabled = !hasOverflow || top <= 2;
+                    if (down) down.disabled = !hasOverflow || top >= max - 2;
 
-                if (fadeTop) fadeTop.style.opacity = top > 6 ? "1" : "0";
-                if (fadeBottom) fadeBottom.style.opacity = top < max - 6 ? "1" : "0";
-            }
-
-            function jump(direction) {
-                scroller.scrollBy({top: direction * 220, behavior: "smooth"});
-            }
-
-            if (up) up.addEventListener("click", function () {
-                jump(-1);
-            });
-            if (down) down.addEventListener("click", function () {
-                jump(1);
-            });
-
-            scroller.addEventListener("keydown", function (event) {
-                if (event.key === "ArrowDown") {
-                    event.preventDefault();
-                    jump(1);
+                    if (fadeTop) fadeTop.style.opacity = top > 6 ? "1" : "0";
+                    if (fadeBottom) fadeBottom.style.opacity = top < max - 6 ? "1" : "0";
                 }
-                if (event.key === "ArrowUp") {
-                    event.preventDefault();
+
+                function jump(direction) {
+                    scroller.scrollBy({top: direction * 220, behavior: "smooth"});
+                }
+
+                if (up) up.addEventListener("click", function () {
                     jump(-1);
-                }
-            });
+                });
+                if (down) down.addEventListener("click", function () {
+                    jump(1);
+                });
 
-            scroller.addEventListener("scroll", updateScrollUI, {passive: true});
-            window.addEventListener("resize", updateScrollUI);
-            updateScrollUI();
+                scroller.addEventListener("keydown", function (event) {
+                    if (event.key === "ArrowDown") {
+                        event.preventDefault();
+                        jump(1);
+                    }
+                    if (event.key === "ArrowUp") {
+                        event.preventDefault();
+                        jump(-1);
+                    }
+                });
+
+                scroller.addEventListener("scroll", updateScrollUI, {passive: true});
+                window.addEventListener("resize", updateScrollUI);
+                updateScrollUI();
+            }
+
+            containers.forEach(setup);
         }
 
-        containers.forEach(setup);
+        function setupCertifications() {
+            var blocks = document.querySelectorAll("[data-certifications]");
+            if (!blocks.length) return;
+
+            blocks.forEach(function (block) {
+                var limit = Number(block.getAttribute("data-cert-limit") || 6);
+                var items = Array.prototype.slice.call(block.querySelectorAll("[data-certification-item]"));
+                var toggleWrap = block.querySelector("[data-cert-toggle-wrap]");
+                var toggle = block.querySelector("[data-cert-toggle]");
+                var toggleLabel = block.querySelector("[data-cert-toggle-label]");
+                var extraItems = items.slice(limit);
+                var expanded = false;
+                var collapsedText = "View " + extraItems.length + " more";
+                var expandedText = "Show fewer";
+
+                if (!extraItems.length || !toggle || !toggleLabel) return;
+                if (toggleWrap) toggleWrap.classList.remove("hidden");
+
+                function render() {
+                    extraItems.forEach(function (item) {
+                        item.hidden = !expanded;
+                    });
+                    toggleLabel.textContent = expanded ? expandedText : collapsedText;
+                    toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+                }
+
+                toggle.addEventListener("click", function () {
+                    expanded = !expanded;
+                    render();
+                });
+
+                render();
+            });
+        }
+
+        function init() {
+            setupCareerScroll();
+            setupCertifications();
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", init, {once: true});
+        } else {
+            init();
+        }
     })();
 </script>
 
+{{- $certifications := $profile.certifications -}}
+{{- $certLimit := 6 -}}
+{{- $remainingCerts := len (after $certLimit $certifications) -}}
 <section class="animate-reveal motion-reduce:animate-none mx-auto mt-[2.4rem] w-full max-w-[1160px] px-[1.1rem]">
     <article
-            class="rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] p-[1.1rem] [box-shadow:var(--shadow)]">
+            class="rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] p-[1.1rem] [box-shadow:var(--shadow)]"
+            data-certifications data-cert-limit="{{ $certLimit }}">
         <h2 class="mb-[0.8rem] mt-0 inline-flex items-center gap-[0.45rem] font-display text-[1.2rem] text-[var(--ink-strong)]">
             <span>Certifications</span>
         </h2>
-        <ul class="mb-[1.2rem] mt-0 grid list-none gap-3 p-0 md:grid-cols-2 lg:grid-cols-3">
-            {{ range $profile.certifications }}
-            {{- $official := .official_url | default .url -}}
-            {{- $credly := .credly_url -}}
+        <ul id="career-certifications" class="mb-[1.2rem] mt-0 grid list-none gap-3 p-0 md:grid-cols-2 lg:grid-cols-3">
+            {{ range $index, $cert := $certifications }}
+            {{- $official := $cert.official_url | default $cert.url -}}
+            {{- $credly := $cert.credly_url -}}
             {{- $logoLink := $credly | default $official -}}
-            {{- $issued := .issue_date | default .issued_date | default .issued -}}
-            {{- $expiry := .expiry_date | default .expires_date | default .expiry -}}
-            <li class="grid grid-cols-[auto_1fr] place-items-start gap-x-[0.7rem] gap-y-[0.16rem] rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[image:var(--surface)] p-3">
-                {{ with .logo }}
+            {{- $issued := $cert.issue_date | default $cert.issued_date | default $cert.issued -}}
+            {{- $expiry := $cert.expiry_date | default $cert.expires_date | default $cert.expiry -}}
+            <li class="grid grid-cols-[auto_1fr] place-items-start gap-x-[0.7rem] gap-y-[0.16rem] rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[image:var(--surface)] p-3"
+                data-certification-item
+                {{ if ge $index $certLimit }}data-cert-extra="true"{{ end }}>
+                {{ with $cert.logo }}
                 {{ if $logoLink }}
                 <a class="inline-flex rounded-lg" href="{{ $logoLink }}" target="_blank" rel="noreferrer">
                     <img class="mt-[0.08rem] h-9 w-9 rounded-lg" src="{{ . }}" alt="" loading="lazy"/>
@@ -163,12 +217,12 @@
                 <div class="grid gap-[0.12rem]">
                     <strong class="text-[var(--stack-strong)]">
                         {{ if $official }}
-                        <a class="no-underline" href="{{ $official }}" target="_blank" rel="noreferrer">{{ .name }}</a>
+                        <a class="no-underline" href="{{ $official }}" target="_blank" rel="noreferrer">{{ $cert.name }}</a>
                         {{ else }}
-                        {{ .name }}
+                        {{ $cert.name }}
                         {{ end }}
                     </strong>
-                    <span class="text-[var(--muted)]">{{ .issuer }} · {{ .status }}</span>
+                    <span class="text-[var(--muted)]">{{ $cert.issuer }} · {{ $cert.status }}</span>
                     {{ if or $issued $expiry }}
                     <div class="mt-[0.18rem] flex flex-wrap gap-[0.34rem] text-[0.72rem] leading-none text-[var(--muted)]">
                         {{ with $issued }}
@@ -201,6 +255,15 @@
             </li>
             {{ end }}
         </ul>
+        {{ if gt $remainingCerts 0 }}
+        <div class="hidden justify-center" data-cert-toggle-wrap>
+            <button type="button"
+                    class="inline-flex rounded-full border border-[var(--button-border)] bg-[image:var(--button-bg)] px-[0.66rem] py-[0.36rem] text-[0.76rem] font-bold leading-none text-[var(--button-ink)]"
+                    data-cert-toggle aria-controls="career-certifications" aria-expanded="false">
+                <span data-cert-toggle-label>View {{ $remainingCerts }} more</span>
+            </button>
+        </div>
+        {{ end }}
     </article>
 </section>
 
