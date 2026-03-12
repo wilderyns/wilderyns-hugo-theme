@@ -142,33 +142,65 @@
             if (!blocks.length) return;
 
             blocks.forEach(function (block) {
-                var limit = Number(block.getAttribute("data-cert-limit") || 6);
                 var items = Array.prototype.slice.call(block.querySelectorAll("[data-certification-item]"));
                 var toggleWrap = block.querySelector("[data-cert-toggle-wrap]");
                 var toggle = block.querySelector("[data-cert-toggle]");
                 var toggleLabel = block.querySelector("[data-cert-toggle-label]");
-                var extraItems = items.slice(limit);
+                var expiredHeading = block.querySelector("[data-cert-expired-heading]");
+                var extraItems = items.filter(function (item) {
+                    return item.getAttribute("data-cert-extra") === "true";
+                });
+                var hasToggle = extraItems.length > 0 && !!toggle && !!toggleLabel;
                 var expanded = false;
                 var collapsedText = "View " + extraItems.length + " more";
                 var expandedText = "Show fewer";
 
-                if (!extraItems.length || !toggle || !toggleLabel) return;
-                if (toggleWrap) toggleWrap.classList.remove("hidden");
-
                 function render() {
+                    if (!hasToggle) {
+                        if (expiredHeading) expiredHeading.classList.add("hidden");
+                        return;
+                    }
                     extraItems.forEach(function (item) {
-                        item.hidden = !expanded;
+                        item.classList.toggle("hidden", !expanded);
                     });
+                    if (expiredHeading) {
+                        expiredHeading.classList.toggle("hidden", !expanded);
+                    }
                     toggleLabel.textContent = expanded ? expandedText : collapsedText;
                     toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
                 }
 
-                toggle.addEventListener("click", function () {
-                    expanded = !expanded;
+                if (hasToggle) {
+                    if (toggleWrap) toggleWrap.classList.remove("hidden");
+                    toggle.addEventListener("click", function () {
+                        expanded = !expanded;
+                        render();
+                    });
                     render();
-                });
+                }
 
-                render();
+                block.addEventListener("click", function (event) {
+                    var jump = event.target.closest("[data-cert-jump]");
+                    if (!jump || !block.contains(jump)) return;
+                    var targetSelector = jump.getAttribute("href");
+                    if (!targetSelector || targetSelector.charAt(0) !== "#") return;
+                    var target = block.querySelector(targetSelector);
+                    if (!target) return;
+
+                    event.preventDefault();
+                    if (hasToggle && target.getAttribute("data-cert-extra") === "true" && !expanded) {
+                        expanded = true;
+                        render();
+                    }
+
+                    window.requestAnimationFrame(function () {
+                        target.scrollIntoView({behavior: "smooth", block: "center"});
+                        target.focus({preventScroll: true});
+                        if (window.history && window.history.replaceState) {
+                            window.history.replaceState(null, "", targetSelector);
+                        }
+                    });
+                });
             });
         }
 
@@ -187,7 +219,84 @@
 
 {{- $certifications := $profile.certifications -}}
 {{- $certLimit := 6 -}}
-{{- $remainingCerts := len (after $certLimit $certifications) -}}
+{{- $todayISO := now.Format "2006-01-02" -}}
+{{- $scratch := newScratch -}}
+{{- $scratch.Set "nameMap" (dict) -}}
+{{- range $certifications }}
+{{- $scratch.Set "nameMap" (merge ($scratch.Get "nameMap") (dict .name true)) -}}
+{{- end }}
+{{- $nameMap := $scratch.Get "nameMap" -}}
+
+{{- $scratch.Set "hiddenComboMap" (dict) -}}
+{{- $scratch.Set "componentMap" (dict) -}}
+{{- range $certifications }}
+{{- $combines := .combines | default (slice) -}}
+{{- if gt (len $combines) 0 -}}
+{{- $statusNorm := lower (replace (replace (.status | default "") "-" " ") "_" " ") -}}
+{{- $allConstituentsExist := true -}}
+{{- range $combines }}
+{{- if not (index $nameMap .) -}}
+{{- $allConstituentsExist = false -}}
+{{- end -}}
+{{- end }}
+{{- $hideCombinationCert := or (eq $statusNorm "in progress") (not $allConstituentsExist) -}}
+{{- if $hideCombinationCert -}}
+{{- $scratch.Set "hiddenComboMap" (merge ($scratch.Get "hiddenComboMap") (dict .name true)) -}}
+{{- else -}}
+{{- range $combines }}
+{{- $scratch.Set "componentMap" (merge ($scratch.Get "componentMap") (dict . true)) -}}
+{{- end }}
+{{- end -}}
+{{- end -}}
+{{- end }}
+{{- $componentMap := $scratch.Get "componentMap" -}}
+{{- $hiddenComboMap := $scratch.Get "hiddenComboMap" -}}
+
+{{- $scratch.Set "expiredMap" (dict) -}}
+{{- range $certifications }}
+{{- if not (index $hiddenComboMap .name) -}}
+{{- $expiryRaw := .expiry_date | default .expires_date | default .expiry -}}
+{{- $isExpired := false -}}
+{{- if $expiryRaw -}}
+{{- $parts := split (string $expiryRaw) "/" -}}
+{{- if eq (len $parts) 3 -}}
+{{- $day := int (index $parts 0) -}}
+{{- $month := int (index $parts 1) -}}
+{{- $year := int (index $parts 2) -}}
+{{- if and (gt $day 0) (gt $month 0) (gt $year 0) -}}
+{{- $expiryISO := printf "%04d-%02d-%02d" $year $month $day -}}
+{{- if lt $expiryISO $todayISO -}}
+{{- $isExpired = true -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if $isExpired -}}
+{{- $scratch.Set "expiredMap" (merge ($scratch.Get "expiredMap") (dict .name true)) -}}
+{{- end -}}
+{{- end }}
+{{- end }}
+{{- $expiredMap := $scratch.Get "expiredMap" -}}
+
+{{- $scratch.Set "primaryCount" 0 -}}
+{{- $scratch.Set "renderedCount" 0 -}}
+{{- $scratch.Set "expiredCount" 0 -}}
+{{- range $certifications }}
+{{- if not (index $hiddenComboMap .name) -}}
+{{- $scratch.Set "renderedCount" (add ($scratch.Get "renderedCount") 1) -}}
+{{- if index $expiredMap .name -}}
+{{- $scratch.Set "expiredCount" (add ($scratch.Get "expiredCount") 1) -}}
+{{- else if not (index $componentMap .name) -}}
+{{- $scratch.Set "primaryCount" (add ($scratch.Get "primaryCount") 1) -}}
+{{- end -}}
+{{- end }}
+{{- end }}
+{{- $primaryCount := $scratch.Get "primaryCount" -}}
+{{- $renderedCount := $scratch.Get "renderedCount" -}}
+{{- $expiredCount := $scratch.Get "expiredCount" -}}
+{{- $defaultVisibleCount := cond (gt $primaryCount $certLimit) $certLimit $primaryCount -}}
+{{- $remainingCerts := sub $renderedCount $defaultVisibleCount -}}
+{{- $scratch.Set "shownPrimaryCount" 0 -}}
 <section class="animate-reveal motion-reduce:animate-none mx-auto mt-[2.4rem] w-full max-w-[1160px] px-[1.1rem]">
     <article
             class="rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] p-[1.1rem] [box-shadow:var(--shadow)]"
@@ -200,18 +309,35 @@
             {{- $official := $cert.official_url | default $cert.url -}}
             {{- $credly := $cert.credly_url -}}
             {{- $logoLink := $credly | default $official -}}
+            {{- $logoLightBgOnDark := $cert.logo_light_bg_on_dark | default false -}}
             {{- $issued := $cert.issue_date | default $cert.issued_date | default $cert.issued -}}
             {{- $expiry := $cert.expiry_date | default $cert.expires_date | default $cert.expiry -}}
-            <li class="grid grid-cols-[auto_1fr] place-items-start gap-x-[0.7rem] gap-y-[0.16rem] rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[image:var(--surface)] p-3"
+            {{- $combines := $cert.combines | default (slice) -}}
+            {{- $certId := printf "career-cert-%s" ($cert.name | urlize) -}}
+            {{- $isHiddenCombo := index $hiddenComboMap $cert.name -}}
+            {{- if not $isHiddenCombo -}}
+            {{- $isExpired := index $expiredMap $cert.name -}}
+            {{- $isComponentCert := index $componentMap $cert.name -}}
+            {{- $shownPrimaryCount := $scratch.Get "shownPrimaryCount" -}}
+            {{- $hideForLimit := and (not $isExpired) (not $isComponentCert) (ge $shownPrimaryCount $certLimit) -}}
+            {{- $hideByDefault := or $isExpired $isComponentCert $hideForLimit -}}
+            {{- $orderClass := "order-1" -}}
+            {{- if $isExpired -}}
+            {{- $orderClass = "order-4" -}}
+            {{- else if $hideByDefault -}}
+            {{- $orderClass = "order-2" -}}
+            {{- end -}}
+            <li id="{{ $certId }}" tabindex="-1" class="grid grid-cols-[auto_1fr] place-items-start gap-x-[0.7rem] gap-y-[0.16rem] rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[image:var(--surface)] p-3 {{ $orderClass }}{{ if $hideByDefault }} hidden{{ end }}"
                 data-certification-item
-                {{ if ge $index $certLimit }}data-cert-extra="true"{{ end }}>
+                {{ if $hideByDefault }}data-cert-extra="true"{{ end }}
+                {{ if $isExpired }}data-cert-expired="true"{{ end }}>
                 {{ with $cert.logo }}
                 {{ if $logoLink }}
                 <a class="inline-flex rounded-lg" href="{{ $logoLink }}" target="_blank" rel="noreferrer">
-                    <img class="mt-[0.08rem] h-9 w-9 rounded-lg" src="{{ . }}" alt="" loading="lazy"/>
+                    <img class="mt-[0.08rem] h-9 w-9 rounded-lg{{ if $logoLightBgOnDark }} cert-logo-light-bg-on-dark{{ end }}" src="{{ . }}" alt="{{ $cert.name }}" data-lightbox-caption="{{ $cert.name }}" loading="lazy"/>
                 </a>
                 {{ else }}
-                <img class="mt-[0.08rem] h-9 w-9 rounded-lg" src="{{ . }}" alt="" loading="lazy"/>
+                <img class="mt-[0.08rem] h-9 w-9 rounded-lg{{ if $logoLightBgOnDark }} cert-logo-light-bg-on-dark{{ end }}" src="{{ . }}" alt="{{ $cert.name }}" data-lightbox-caption="{{ $cert.name }}" loading="lazy"/>
                 {{ end }}
                 {{ end }}
                 <div class="grid gap-[0.12rem]">
@@ -223,6 +349,44 @@
                         {{ end }}
                     </strong>
                     <span class="text-[var(--muted)]">{{ $cert.issuer }} · {{ $cert.status }}</span>
+                    {{ if gt (len $combines) 0 }}
+                    <div class="mt-[0.28rem] rounded-lg border border-[color:rgba(73,208,196,0.34)] bg-[linear-gradient(140deg,rgba(73,208,196,0.12),rgba(127,184,255,0.08))] p-[0.4rem]">
+                        <p class="mb-[0.3rem] mt-0 font-mono text-[0.62rem] font-bold uppercase tracking-[0.08em] text-[var(--warning)]">
+                            Built From
+                        </p>
+                        <div class="flex flex-wrap items-center gap-[0.26rem]">
+                            {{ range $combineIndex, $combineName := $combines }}
+                            {{ if gt $combineIndex 0 }}
+                            <span class="text-[0.66rem] font-bold text-[var(--stack-strong)]">+</span>
+                            {{ end }}
+                            {{- $combineMatch := where $certifications "name" $combineName -}}
+                            {{ if gt (len $combineMatch) 0 }}
+                            {{- $combineCert := index $combineMatch 0 -}}
+                            {{- $combineIsHidden := index $hiddenComboMap $combineCert.name -}}
+                            {{- $combineTargetId := printf "career-cert-%s" ($combineCert.name | urlize) -}}
+                            {{ if not $combineIsHidden }}
+                            <a class="inline-flex items-center gap-[0.24rem] rounded-full border border-[color:rgba(127,184,255,0.34)] bg-[color:rgba(18,30,46,0.45)] px-[0.36rem] py-[0.2rem] text-[0.66rem] font-semibold leading-none text-[var(--stack-strong)] no-underline"
+                               href="#{{ $combineTargetId }}" data-cert-jump>
+                                {{ with $combineCert.logo }}<img class="h-4 w-4 rounded-sm{{ if ($combineCert.logo_light_bg_on_dark | default false) }} cert-logo-light-bg-on-dark{{ end }}" src="{{ . }}" alt=""
+                                                                  data-lightbox="off" loading="lazy"/>{{ end }}
+                                <span>{{ $combineCert.name }}</span>
+                            </a>
+                            {{ else }}
+                            <span class="inline-flex items-center gap-[0.24rem] rounded-full border border-[color:rgba(127,184,255,0.34)] bg-[color:rgba(18,30,46,0.45)] px-[0.36rem] py-[0.2rem] text-[0.66rem] font-semibold leading-none text-[var(--stack-strong)]">
+                                {{ with $combineCert.logo }}<img class="h-4 w-4 rounded-sm{{ if ($combineCert.logo_light_bg_on_dark | default false) }} cert-logo-light-bg-on-dark{{ end }}" src="{{ . }}" alt=""
+                                                                  data-lightbox="off" loading="lazy"/>{{ end }}
+                                <span>{{ $combineCert.name }}</span>
+                            </span>
+                            {{ end }}
+                            {{ else }}
+                            <span class="inline-flex items-center rounded-full border border-[color:rgba(127,184,255,0.34)] bg-[color:rgba(18,30,46,0.45)] px-[0.36rem] py-[0.2rem] text-[0.66rem] font-semibold leading-none text-[var(--stack-strong)]">
+                                {{ $combineName }}
+                            </span>
+                            {{ end }}
+                            {{ end }}
+                        </div>
+                    </div>
+                    {{ end }}
                     {{ if or $issued $expiry }}
                     <div class="mt-[0.18rem] flex flex-wrap gap-[0.34rem] text-[0.72rem] leading-none text-[var(--muted)]">
                         {{ with $issued }}
@@ -253,6 +417,17 @@
                     {{ end }}
                 </div>
             </li>
+            {{ if and (not $isExpired) (not $isComponentCert) (not $hideForLimit) }}
+            {{- $scratch.Set "shownPrimaryCount" (add ($scratch.Get "shownPrimaryCount") 1) -}}
+            {{ end }}
+            {{ end }}
+            {{ end }}
+            {{ if gt $expiredCount 0 }}
+            <li class="hidden order-3 md:col-span-2 lg:col-span-3" data-cert-expired-heading>
+                <div class="rounded-lg border border-[color:rgba(255,176,93,0.36)] bg-[color:rgba(255,176,93,0.08)] px-[0.62rem] py-[0.42rem]">
+                    <p class="m-0 font-mono text-[0.72rem] font-bold uppercase tracking-[0.08em] text-[var(--warning)]">Expired</p>
+                </div>
+            </li>
             {{ end }}
         </ul>
         {{ if gt $remainingCerts 0 }}
@@ -266,6 +441,7 @@
         {{ end }}
     </article>
 </section>
+{{ partial "image-lightbox.html" (dict "scopeSelector" "#career-certifications") }}
 
 <section class="animate-reveal motion-reduce:animate-none mx-auto mt-[2.4rem] w-full max-w-[1160px] px-[1.1rem]">
     <div class="mb-4 flex items-baseline justify-between gap-[0.8rem]">

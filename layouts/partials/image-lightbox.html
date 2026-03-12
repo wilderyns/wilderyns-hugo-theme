@@ -47,8 +47,11 @@
         const openLightbox = (img) => {
             const fullSrc = img.getAttribute('data-lightbox-src') || img.currentSrc || img.src;
             const caption = img.getAttribute('data-lightbox-caption') || img.alt || '';
+            const useLightBgOnDark = img.classList.contains('cert-logo-light-bg-on-dark')
+                || img.getAttribute('data-lightbox-light-bg-on-dark') === 'true';
             overlayImage.src = fullSrc;
             overlayImage.alt = img.alt || '';
+            overlayImage.classList.toggle('lightbox-image-light-bg-on-dark', useLightBgOnDark);
             overlayCaption.textContent = caption;
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
@@ -59,6 +62,7 @@
             overlay.classList.remove('flex');
             overlay.classList.add('hidden');
             overlayImage.src = '';
+            overlayImage.classList.remove('lightbox-image-light-bg-on-dark');
             overlayCaption.textContent = '';
             document.body.style.overflow = '';
         };
