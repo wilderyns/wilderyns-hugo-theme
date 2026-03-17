@@ -355,31 +355,31 @@
                             Built From
                         </p>
                         <div class="flex flex-wrap items-center gap-[0.26rem]">
-                            {{ range $combineIndex, $combineName := $combines }}
-                            {{ if gt $combineIndex 0 }}
-                            <span class="text-[0.66rem] font-bold text-[var(--stack-strong)]">+</span>
-                            {{ end }}
+                            {{ range $combineName := $combines }}
                             {{- $combineMatch := where $certifications "name" $combineName -}}
                             {{ if gt (len $combineMatch) 0 }}
                             {{- $combineCert := index $combineMatch 0 -}}
                             {{- $combineIsHidden := index $hiddenComboMap $combineCert.name -}}
                             {{- $combineTargetId := printf "career-cert-%s" ($combineCert.name | urlize) -}}
+                            {{- $combineDisplayName := $combineCert.combined_name | default $combineCert.name -}}
                             {{ if not $combineIsHidden }}
                             <a class="inline-flex items-center gap-[0.24rem] rounded-full border border-[color:rgba(127,184,255,0.34)] bg-[color:rgba(18,30,46,0.45)] px-[0.36rem] py-[0.2rem] text-[0.66rem] font-semibold leading-none text-[var(--stack-strong)] no-underline"
-                               href="#{{ $combineTargetId }}" data-cert-jump>
+                               href="#{{ $combineTargetId }}" data-cert-jump title="{{ $combineCert.name }}">
                                 {{ with $combineCert.logo }}<img class="h-4 w-4 rounded-sm{{ if ($combineCert.logo_light_bg_on_dark | default false) }} cert-logo-light-bg-on-dark{{ end }}" src="{{ . }}" alt=""
                                                                   data-lightbox="off" loading="lazy"/>{{ end }}
-                                <span>{{ $combineCert.name }}</span>
+                                <span>{{ $combineDisplayName }}</span>
                             </a>
                             {{ else }}
-                            <span class="inline-flex items-center gap-[0.24rem] rounded-full border border-[color:rgba(127,184,255,0.34)] bg-[color:rgba(18,30,46,0.45)] px-[0.36rem] py-[0.2rem] text-[0.66rem] font-semibold leading-none text-[var(--stack-strong)]">
+                            <span class="inline-flex items-center gap-[0.24rem] rounded-full border border-[color:rgba(127,184,255,0.34)] bg-[color:rgba(18,30,46,0.45)] px-[0.36rem] py-[0.2rem] text-[0.66rem] font-semibold leading-none text-[var(--stack-strong)]"
+                                  title="{{ $combineCert.name }}">
                                 {{ with $combineCert.logo }}<img class="h-4 w-4 rounded-sm{{ if ($combineCert.logo_light_bg_on_dark | default false) }} cert-logo-light-bg-on-dark{{ end }}" src="{{ . }}" alt=""
                                                                   data-lightbox="off" loading="lazy"/>{{ end }}
-                                <span>{{ $combineCert.name }}</span>
+                                <span>{{ $combineDisplayName }}</span>
                             </span>
                             {{ end }}
                             {{ else }}
-                            <span class="inline-flex items-center rounded-full border border-[color:rgba(127,184,255,0.34)] bg-[color:rgba(18,30,46,0.45)] px-[0.36rem] py-[0.2rem] text-[0.66rem] font-semibold leading-none text-[var(--stack-strong)]">
+                            <span class="inline-flex items-center rounded-full border border-[color:rgba(127,184,255,0.34)] bg-[color:rgba(18,30,46,0.45)] px-[0.36rem] py-[0.2rem] text-[0.66rem] font-semibold leading-none text-[var(--stack-strong)]"
+                                  title="{{ $combineName }}">
                                 {{ $combineName }}
                             </span>
                             {{ end }}
