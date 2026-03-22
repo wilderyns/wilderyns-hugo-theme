@@ -44,6 +44,10 @@
         --empty-border: rgba(73, 208, 196, 0.36);
         --social-empty: #c5dbf0;
         --career-fade: rgba(11, 17, 25, 0.9);
+        --career-role-line: rgba(127, 184, 255, 0.34);
+        --career-role-dot-border: rgba(73, 208, 196, 0.88);
+        --career-role-dot-fill: rgba(73, 208, 196, 0.22);
+        --career-employment-glow: rgba(73, 208, 196, 0.18);
         --bg-layer-1: radial-gradient(1300px 700px at 0% -20%, rgba(73, 208, 196, 0.16), transparent 55%);
         --bg-layer-2: radial-gradient(1100px 600px at 100% 0%, rgba(127, 184, 255, 0.17), transparent 52%);
         --bg-layer-3: linear-gradient(150deg, #0a1118, #101a24 42%, #0c151e);
@@ -91,6 +95,10 @@
         --empty-border: rgba(14, 139, 134, 0.26);
         --social-empty: #335576;
         --career-fade: rgba(245, 251, 255, 0.95);
+        --career-role-line: rgba(47, 120, 207, 0.3);
+        --career-role-dot-border: rgba(14, 139, 134, 0.62);
+        --career-role-dot-fill: rgba(14, 139, 134, 0.2);
+        --career-employment-glow: rgba(47, 120, 207, 0.15);
         --bg-layer-1: radial-gradient(1300px 700px at 0% -20%, rgba(14, 139, 134, 0.12), transparent 55%);
         --bg-layer-2: radial-gradient(1100px 600px at 100% 0%, rgba(47, 120, 207, 0.16), transparent 52%);
         --bg-layer-3: linear-gradient(150deg, #f3f8ff, #eef6ff 42%, #eff8ff);
@@ -153,6 +161,52 @@
 
     .career-scroll-progress {
         transition: width 0.18s ease-out;
+    }
+
+    .career-employment-card {
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .career-employment-card:hover {
+        transform: translateY(-1px);
+        border-color: var(--career-employment-glow);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 18px -14px var(--career-employment-glow);
+    }
+
+    .career-role-item {
+        position: relative;
+        padding-left: 1.14rem;
+    }
+
+    .career-role-item::before {
+        content: "";
+        position: absolute;
+        left: 0.34rem;
+        top: 0.38rem;
+        bottom: -0.92rem;
+        width: 1px;
+        background: var(--career-role-line);
+    }
+
+    .career-role-item::after {
+        content: "";
+        position: absolute;
+        left: 0.05rem;
+        top: 0.34rem;
+        width: 0.56rem;
+        height: 0.56rem;
+        border-radius: 999px;
+        border: 1px solid var(--career-role-dot-border);
+        background: var(--career-role-dot-fill);
+    }
+
+    .career-role-item-last::before {
+        bottom: 0.58rem;
+    }
+
+    .career-role-item p {
+        text-wrap: pretty;
     }
 
     :root[data-theme="dark"] .cert-logo-light-bg-on-dark {
@@ -274,6 +328,20 @@
             border-radius: 999px;
             background-clip: padding-box;
             background: linear-gradient(180deg, rgba(73, 208, 196, 0.72), rgba(127, 184, 255, 0.72));
+        }
+    }
+
+    @media (max-width: 640px) {
+        .career-role-item {
+            padding-left: 1rem;
+        }
+
+        .career-role-item::before {
+            left: 0.29rem;
+        }
+
+        .career-role-item::after {
+            left: 0.01rem;
         }
     }
 }

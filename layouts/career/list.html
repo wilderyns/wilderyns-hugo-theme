@@ -21,14 +21,59 @@
                 <div class="career-scroll-fade-bottom pointer-events-none absolute inset-x-0 bottom-0 z-[1] hidden h-10 lg:block"></div>
                 <div class="career-scroll-region ml-[0.2rem] space-y-4 pr-2 lg:h-full lg:overflow-y-auto" data-career-scroll tabindex="0"
                      aria-label="Career timeline">
-                    {{ range $profile.career }}
-                    <div class="relative pl-5">
+                    {{ range $employment := $profile.career }}
+                    {{- $roles := $employment.roles -}}
+                    {{- if not $roles -}}
+                    {{- $roles = slice (dict "title" $employment.title "range" $employment.range "details" $employment.details) -}}
+                    {{- end -}}
+                    {{- $org := $employment.org | default $employment.company -}}
+                    {{- $employmentMeta := "" -}}
+                    {{- with $employment.employment_type -}}
+                    {{- $employmentMeta = . -}}
+                    {{- end -}}
+                    {{- with $employment.location -}}
+                    {{- if $employmentMeta -}}
+                    {{- $employmentMeta = printf "%s · %s" $employmentMeta . -}}
+                    {{- else -}}
+                    {{- $employmentMeta = . -}}
+                    {{- end -}}
+                    {{- end -}}
+                    <div class="career-employment relative pl-5">
                         <span class="absolute left-0 top-0 h-full w-px bg-[color:rgba(73,208,196,0.45)]"></span>
                         <span class="absolute left-[-4px] top-[0.22rem] h-[9px] w-[9px] rounded-full border border-[color:rgba(73,208,196,0.8)] bg-[color:rgba(73,208,196,0.24)]"></span>
-                        <p class="mb-[0.2rem] mt-0 font-mono text-[0.78rem] text-[var(--warning)]">{{ .range }}</p>
-                        <h3 class="m-0 font-display text-[1.1rem] text-[var(--ink-strong)]">{{ .title }}</h3>
-                        <p class="mb-[0.28rem] mt-[0.1rem] text-[var(--timeline-org)]">{{ .org }}</p>
-                        <p class="m-0 text-[var(--muted)]">{{ .details }}</p>
+                        <article class="career-employment-card rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[linear-gradient(150deg,rgba(127,184,255,0.06),rgba(73,208,196,0.05))] p-[0.85rem]">
+                            <h3 class="m-0 font-display text-[1.12rem] text-[var(--ink-strong)]">{{ $org }}</h3>
+                            {{ if $employmentMeta }}
+                            <p class="mb-0 mt-[0.14rem] text-[0.82rem] font-medium text-[var(--timeline-org)]">{{ $employmentMeta }}</p>
+                            {{ end }}
+                            <div class="career-role-stack mt-3 space-y-[0.8rem]">
+                                {{- $roleTotal := len $roles -}}
+                                {{ range $roleIndex, $role := $roles }}
+                                {{- $roleMeta := "" -}}
+                                {{- with $role.range -}}
+                                {{- $roleMeta = . -}}
+                                {{- end -}}
+                                {{- with $role.location -}}
+                                {{- if $roleMeta -}}
+                                {{- $roleMeta = printf "%s · %s" $roleMeta . -}}
+                                {{- else -}}
+                                {{- $roleMeta = . -}}
+                                {{- end -}}
+                                {{- end -}}
+                                <div class="career-role-item{{ if eq (add $roleIndex 1) $roleTotal }} career-role-item-last{{ end }}">
+                                    {{ if $roleMeta }}
+                                    <p class="mb-[0.2rem] mt-0 font-mono text-[0.76rem] text-[var(--warning)]">{{ $roleMeta }}</p>
+                                    {{ end }}
+                                    {{ with $role.title }}
+                                    <h4 class="m-0 font-display text-[1.02rem] leading-[1.25] text-[var(--ink-strong)]">{{ . }}</h4>
+                                    {{ end }}
+                                    {{ with $role.details }}
+                                    <p class="mb-0 mt-[0.26rem] text-[0.93rem] leading-[1.52] text-[var(--muted)]">{{ . }}</p>
+                                    {{ end }}
+                                </div>
+                                {{ end }}
+                            </div>
+                        </article>
                     </div>
                     {{ end }}
                 </div>
