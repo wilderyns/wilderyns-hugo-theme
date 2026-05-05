@@ -33,7 +33,7 @@
         <h2 class="mb-[0.25rem] mt-0 font-display text-[1.25rem] text-[var(--ink-strong)]">{{ $aboutTitle }}</h2>
         <p class="m-0 text-[var(--muted)]">{{ $aboutText }}</p>
         <ul class="m-0 mt-[0.9rem] grid list-none gap-[0.7rem] p-0">
-            <li class="rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[color:rgba(127,184,255,0.06)] px-[0.8rem] py-[0.7rem]">
+            <li class="home-activity-item rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[color:rgba(127,184,255,0.06)] px-[0.8rem] py-[0.7rem]">
                 <div class="flex items-center justify-between gap-2">
                     <strong class="text-[0.75rem] uppercase tracking-[0.08em] text-[var(--panel-strong)]">Last listened
                         to</strong>
@@ -43,7 +43,7 @@
                 <p data-activity-value="listened" class="home-activity-value m-0 mt-[0.32rem] text-[var(--muted)]">
                     Coming soon</p>
             </li>
-            <li class="rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[color:rgba(127,184,255,0.06)] px-[0.8rem] py-[0.7rem]">
+            <li class="home-activity-item rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[color:rgba(127,184,255,0.06)] px-[0.8rem] py-[0.7rem]">
                 <div class="flex items-center justify-between gap-2">
                     <strong class="text-[0.75rem] uppercase tracking-[0.08em] text-[var(--panel-strong)]">Last watched</strong>
                     <span data-activity-source="watched"
@@ -52,7 +52,7 @@
                 <p data-activity-value="watched" class="home-activity-value m-0 mt-[0.32rem] text-[var(--muted)]">
                     Coming soon</p>
             </li>
-            <li class="rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[color:rgba(127,184,255,0.06)] px-[0.8rem] py-[0.7rem]">
+            <li class="home-activity-item rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[color:rgba(127,184,255,0.06)] px-[0.8rem] py-[0.7rem]">
                 <div class="flex items-center justify-between gap-2">
                     <strong class="text-[0.75rem] uppercase tracking-[0.08em] text-[var(--panel-strong)]">Last played</strong>
                     <span data-activity-source="played"
@@ -152,6 +152,58 @@
                 if (!best) return current;
                 return parseTimestamp(current && current[field]) > parseTimestamp(best && best[field]) ? current : best;
             }, null);
+        }
+
+        function pickLatestByFields(items, fields) {
+            var list = asArray(items);
+            return list.reduce(function (best, current) {
+                var currentTs = parseTimestamp(firstPopulated(current, fields));
+                var bestTs = parseTimestamp(firstPopulated(best, fields));
+                if (!best) return current;
+                return currentTs > bestTs ? current : best;
+            }, null);
+        }
+
+        function firstPopulated(item, fields) {
+            if (!item) return "";
+            for (var i = 0; i < fields.length; i++) {
+                var value = item[fields[i]];
+                if (value !== undefined && value !== null && String(value).trim() !== "") return value;
+            }
+            return "";
+        }
+
+        function cleanText(value, fallback) {
+            var text = String(value || "").trim();
+            return text || fallback || "";
+        }
+
+        function toFiniteNumber(value) {
+            var n = Number(value);
+            return Number.isFinite(n) ? n : null;
+        }
+
+        function firstFiniteNumber(item, fields) {
+            if (!item) return null;
+            for (var i = 0; i < fields.length; i++) {
+                var n = toFiniteNumber(item[fields[i]]);
+                if (n !== null) return n;
+            }
+            return null;
+        }
+
+        function joinParts(parts) {
+            return asArray(parts).filter(function (part) {
+                return Boolean(part && String(part).trim());
+            }).join(" · ");
+        }
+
+        function resolveArtworkUrl(value, width, height) {
+            var raw = cleanText(value, "");
+            if (!raw) return "";
+            return raw
+                .replace(/\{w\}/g, String(width))
+                .replace(/\{h\}/g, String(height));
         }
 
         function pad2(value) {
@@ -264,6 +316,57 @@
             return span;
         }
 
+        function imageIconNode(src, label, className, width, height) {
+            var url = cleanText(src, "");
+            if (!url) return null;
+            var img = document.createElement("img");
+            img.src = url;
+            img.alt = label || "";
+            img.className = className || "home-activity-cover";
+            img.loading = "lazy";
+            img.width = width;
+            img.height = height;
+            img.setAttribute("width", String(width));
+            img.setAttribute("height", String(height));
+            return img;
+        }
+
+        function achievementProgressText(earned, total) {
+            var earnedNum = toFiniteNumber(earned);
+            var totalNum = toFiniteNumber(total);
+            if (earnedNum !== null && totalNum !== null && totalNum > 0) {
+                return earnedNum.toLocaleString() + "/" + totalNum.toLocaleString() + " achievements";
+            }
+            if (earnedNum !== null) {
+                return earnedNum.toLocaleString() + " achievements";
+            }
+            return "";
+        }
+
+        function steamAchievementText(item) {
+            return achievementProgressText(item && item.EarnedAchievements, item && item.TotalAchievements);
+        }
+
+        function retroAchievementText(item) {
+            if (!item) return "";
+
+            var progress = achievementProgressText(
+                firstFiniteNumber(item, ["EarnedAchievements", "AchievementsEarned", "LastGameAchievementsEarned"]),
+                firstFiniteNumber(item, ["TotalAchievements", "AchievementsTotal", "LastGameAchievementsTotal"])
+            );
+
+            var hardcore = toFiniteNumber(item.HardcorePoints);
+            var softcore = toFiniteNumber(item.SoftcorePoints);
+            var retroPoints = toFiniteNumber(item.RetroPoints);
+            var pointsText = joinParts([
+                hardcore !== null ? "HC " + hardcore.toLocaleString() : "",
+                softcore !== null ? "SC " + softcore.toLocaleString() : "",
+                retroPoints !== null ? retroPoints.toLocaleString() + " pts" : ""
+            ]);
+
+            return joinParts([progress, pointsText]);
+        }
+
         function withSubtext(mainNodes, subtext) {
             var nodes = [];
             var main = document.createElement("span");
@@ -296,11 +399,66 @@
         }
 
         function choosePlayed(data) {
-            var wow = pickLatest(data && data.Wow, "LastModified");
-            var steam = pickLatest(data && data.Steam, "LastChange");
-            if (wow) return {source: "WoW", service: "wow", item: wow};
-            if (steam) return {source: "Steam", service: "steam", item: steam};
-            return null;
+            var candidates = [];
+            var wow = pickLatestByFields(data && data.Wow, ["LastModified", "LastOnline", "LastCheck"]);
+            var steam = pickLatestByFields(data && data.Steam, ["LastChange", "LastModified", "LastCheck"]);
+            var retro = pickLatestByFields((data && data.RetroAchievements) || (data && data.Retroachievements), ["LastChange", "LastModified", "LastCheck"]);
+            var battlenet = pickLatestByFields((data && data.BattleNet) || (data && data.Battlenet), ["LastChange", "LastModified", "LastOnline", "LastCheck"]);
+
+            if (wow) {
+                candidates.push({
+                    source: "Battle.net",
+                    service: "wow",
+                    item: wow,
+                    timestamp: firstPopulated(wow, ["LastModified", "LastOnline", "LastCheck"])
+                });
+            }
+            if (steam) {
+                candidates.push({
+                    source: "Steam",
+                    service: "steam",
+                    item: steam,
+                    timestamp: firstPopulated(steam, ["LastChange", "LastModified", "LastCheck"])
+                });
+            }
+            if (retro) {
+                candidates.push({
+                    source: "RetroAchievements",
+                    service: "retroachievements",
+                    item: retro,
+                    timestamp: firstPopulated(retro, ["LastChange", "LastModified", "LastCheck"])
+                });
+            }
+            if (battlenet) {
+                candidates.push({
+                    source: "Battle.net",
+                    service: "battlenet",
+                    item: battlenet,
+                    timestamp: firstPopulated(battlenet, ["LastChange", "LastModified", "LastOnline", "LastCheck"])
+                });
+            }
+
+            if (!candidates.length) return null;
+
+            return candidates.reduce(function (best, current) {
+                if (!best) return current;
+                return parseTimestamp(current.timestamp) > parseTimestamp(best.timestamp) ? current : best;
+            }, null);
+        }
+
+        function formatRelativeEventText(prefix, timestamp) {
+            var ago = timeAgo(timestamp);
+            if (ago) return prefix + " " + ago;
+            return "";
+        }
+
+        function formatHoursPlayed(hours) {
+            var n = Number(hours);
+            if (!Number.isFinite(n)) return "";
+            if (Math.abs(n - Math.round(n)) < 0.001) {
+                return n.toLocaleString() + "h played";
+            }
+            return n.toFixed(1) + "h played";
         }
 
         function renderMusic(data) {
@@ -311,17 +469,27 @@
             }
 
             var item = selected.item;
-            var song = item.Song || "Unknown track";
-            var artist = item.Artist || "Unknown artist";
-            var album = item.Album || "Unknown album";
-            var nodes = [
-                linkOrText(song, asUrl(item.SongLink)),
-                document.createTextNode(" by "),
-                linkOrText(artist, asUrl(item.ArtistLink)),
-                document.createTextNode(" on "),
-                linkOrText(album, asUrl(item.AlbumLink))
-            ];
-            setActivityNodes("listened", nodes, selected.source);
+            var song = cleanText(item.Song, "Unknown track");
+            var artist = cleanText(item.Artist, "Unknown artist");
+            var album = cleanText(item.Album, "Unknown album");
+            var musicMainNodes = [];
+            var albumArtUrl = selected.source === "Apple Music"
+                ? resolveArtworkUrl(item.AlbumArtURL, 24, 24)
+                : "";
+            var musicIcon = albumArtUrl
+                ? imageIconNode(albumArtUrl, album + " artwork", "home-activity-cover", 24, 24)
+                : null;
+
+            if (musicIcon) musicMainNodes.push(musicIcon);
+            musicMainNodes.push(linkOrText(song, asUrl(item.SongLink)));
+
+            var musicSubtext = joinParts([
+                artist,
+                album,
+                formatRelativeEventText("Listened", item.LastChange)
+            ]);
+
+            setActivityNodes("listened", withSubtext(musicMainNodes, musicSubtext), selected.source);
         }
 
         function renderWatched(data) {
@@ -337,15 +505,10 @@
             var episode = pad2(watched.Episode);
             var episodeTag = season && episode && type !== "movie" ? " (S" + season + "E" + episode + ")" : "";
             var imdb = imdbUrl(watched.IMDB);
-            var watchedWhen = formatDateTime(watched.WatchedAt);
             var watchedAgo = timeAgo(watched.WatchedAt);
             var watchedSubtext = "";
 
-            if (watchedWhen && watchedAgo) {
-                watchedSubtext = "Watched " + watchedAgo + " · " + watchedWhen;
-            } else if (watchedWhen) {
-                watchedSubtext = "Watched " + watchedWhen;
-            }
+            if (watchedAgo) watchedSubtext = "Watched " + watchedAgo;
 
             var titleWithEpisode = title + episodeTag;
             var watchedNodes = [
@@ -366,42 +529,67 @@
 
             if (selected.service === "steam") {
                 var steam = selected.item;
-                var game = steam.Game || "Unknown game";
-                var hours = Number(steam.HoursPlayed);
-                var hoursText = Number.isFinite(hours) ? hours.toFixed(1) + "h played" : "";
-                var steamAgo = timeAgo(steam.LastChange);
-                var steamWhen = formatDateTime(steam.LastChange);
-                var steamSubtext = "";
-
-                if (steamAgo && steamWhen) {
-                    steamSubtext = "Last played " + steamAgo + " · " + steamWhen;
-                } else if (steamAgo) {
-                    steamSubtext = "Last played " + steamAgo;
-                } else if (steamWhen) {
-                    steamSubtext = "Last played " + steamWhen;
-                }
-
-                if (hoursText && steamSubtext) {
-                    steamSubtext = steamSubtext + " · " + hoursText;
-                } else if (hoursText) {
-                    steamSubtext = hoursText;
-                }
-
-                var steamNodes = [linkOrText(game, asUrl(steam.GameLink))];
+                var game = cleanText(steam.GameName || steam.Game, "Unknown game");
+                var steamTimestamp = firstPopulated(steam, ["LastChange", "LastModified", "LastCheck"]);
+                var steamSubtext = joinParts([
+                    formatRelativeEventText("Last played", steamTimestamp),
+                    formatHoursPlayed(steam.HoursPlayed),
+                    steamAchievementText(steam)
+                ]);
+                var steamIcon = imageIconNode(asUrl(steam.GameIconURL || steam.GameLogoURL), game + " icon", "home-activity-cover", 24, 24);
+                var steamNodes = [
+                    steamIcon || iconNode("🎮", "Steam"),
+                    linkOrText(game, asUrl(steam.GameURL || steam.GameLink))
+                ];
                 setActivityNodes("played", withSubtext(steamNodes, steamSubtext), "Steam");
                 return;
             }
 
+            if (selected.service === "retroachievements") {
+                var retro = selected.item;
+                var retroGame = cleanText(retro.LastGameTitle || retro.GameTitle, "Unknown game");
+                var retroTimestamp = firstPopulated(retro, ["LastChange", "LastModified", "LastCheck"]);
+                var retroSubtext = joinParts([
+                    cleanText(retro.RichPresence, ""),
+                    formatRelativeEventText("Last played", retroTimestamp),
+                    retroAchievementText(retro)
+                ]);
+                var retroLink = "";
+                if (retro.LastGameID) {
+                    retroLink = "https://retroachievements.org/game/" + encodeURIComponent(String(retro.LastGameID));
+                }
+                var retroIcon = imageIconNode(asUrl(retro.GameIconURL), retroGame + " icon", "home-activity-cover", 24, 24);
+                var retroNodes = [
+                    retroIcon || iconNode("🏆", "RetroAchievements"),
+                    linkOrText(retroGame, retroLink)
+                ];
+                setActivityNodes("played", withSubtext(retroNodes, retroSubtext), "RetroAchievements");
+                return;
+            }
+
+            if (selected.service === "battlenet") {
+                var battle = selected.item;
+                var battleGame = cleanText(battle.GameName || battle.Game || battle.Title, "Unknown game");
+                var battleTimestamp = firstPopulated(battle, ["LastChange", "LastModified", "LastOnline", "LastCheck"]);
+                var battleNodes = [
+                    iconNode("⚔️", "Battle.net"),
+                    document.createTextNode(" "),
+                    linkOrText(battleGame, asUrl(battle.GameURL || battle.GameLink || battle.URL))
+                ];
+                setActivityNodes("played", withSubtext(battleNodes, formatRelativeEventText("Last played", battleTimestamp)), "Battle.net");
+                return;
+            }
+
             var wow = selected.item;
-            var character = wow.Character || "Unknown character";
-            var realm = wow.Realm || "Unknown realm";
-            var location = wow.Location || "Unknown location";
+            var character = cleanText(wow.Character, "Unknown character");
+            var realm = cleanText(wow.Realm, "Unknown realm");
+            var location = cleanText(wow.Location, "Unknown location");
             var wowSuffixText = "(" + realm + ")";
-            var lastSeenValue = wow.LastModified || wow.LastOnline;
-            var lastSeenAgo = timeAgo(lastSeenValue);
-            var wowSubtext = lastSeenAgo
-                ? "Last seen " + lastSeenAgo + " in " + location
-                : "Last seen at an unknown time in " + location;
+            var lastSeenValue = firstPopulated(wow, ["LastModified", "LastOnline", "LastCheck"]);
+            var wowSubtext = joinParts([
+                formatRelativeEventText("Last played", lastSeenValue),
+                location
+            ]);
             var wowMainNodes = [];
             var avatarUrl = asUrl(wow.AvatarURL);
             var armoryUrl = asUrl(wow.ArmoryURL);
@@ -426,7 +614,7 @@
             wowSuffix.className = "home-activity-suffix";
             wowSuffix.textContent = wowSuffixText;
             wowMainNodes.push(wowSuffix);
-            setActivityNodes("played", withSubtext(wowMainNodes, wowSubtext), "WoW");
+            setActivityNodes("played", withSubtext(wowMainNodes, wowSubtext), "Battle.net");
         }
 
         function refreshActivity() {
