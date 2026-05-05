@@ -350,21 +350,17 @@
         function retroAchievementText(item) {
             if (!item) return "";
 
-            var progress = achievementProgressText(
+            return achievementProgressText(
                 firstFiniteNumber(item, ["EarnedAchievements", "AchievementsEarned", "LastGameAchievementsEarned"]),
                 firstFiniteNumber(item, ["TotalAchievements", "AchievementsTotal", "LastGameAchievementsTotal"])
             );
+        }
 
-            var hardcore = toFiniteNumber(item.HardcorePoints);
-            var softcore = toFiniteNumber(item.SoftcorePoints);
-            var retroPoints = toFiniteNumber(item.RetroPoints);
-            var pointsText = joinParts([
-                hardcore !== null ? "HC " + hardcore.toLocaleString() : "",
-                softcore !== null ? "SC " + softcore.toLocaleString() : "",
-                retroPoints !== null ? retroPoints.toLocaleString() + " pts" : ""
-            ]);
-
-            return joinParts([progress, pointsText]);
+        function retroCompletionText(item) {
+            if (!item) return "";
+            if (item.Mastered === true) return "Mastered";
+            if (item.Beaten === true) return "Beaten";
+            return "";
         }
 
         function withSubtext(mainNodes, subtext) {
@@ -461,6 +457,23 @@
             return n.toFixed(1) + "h played";
         }
 
+        function formatPlaytimeSeconds(seconds) {
+            var totalSeconds = toFiniteNumber(seconds);
+            if (totalSeconds === null || totalSeconds < 0) return "";
+
+            var totalMinutes = Math.floor(totalSeconds / 60);
+            var hours = Math.floor(totalMinutes / 60);
+            var minutes = totalMinutes % 60;
+
+            if (hours <= 0) {
+                return minutes.toLocaleString() + "m played";
+            }
+            if (minutes === 0) {
+                return hours.toLocaleString() + "h played";
+            }
+            return hours.toLocaleString() + "h " + minutes.toLocaleString() + "m played";
+        }
+
         function renderMusic(data) {
             var selected = chooseMusic(data);
             if (!selected || !selected.item) {
@@ -550,9 +563,10 @@
                 var retroGame = cleanText(retro.LastGameTitle || retro.GameTitle, "Unknown game");
                 var retroTimestamp = firstPopulated(retro, ["LastChange", "LastModified", "LastCheck"]);
                 var retroSubtext = joinParts([
-                    cleanText(retro.RichPresence, ""),
                     formatRelativeEventText("Last played", retroTimestamp),
-                    retroAchievementText(retro)
+                    retroAchievementText(retro),
+                    retroCompletionText(retro),
+                    formatPlaytimeSeconds(firstFiniteNumber(retro, ["PlaytimeSeconds"]))
                 ]);
                 var retroLink = "";
                 if (retro.LastGameID) {
