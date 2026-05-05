@@ -11,8 +11,9 @@
     {{ end }}
 </section>
 
+<div id="career-lightbox-scope">
 <section class="animate-reveal motion-reduce:animate-none mx-auto mt-[2.4rem] w-full max-w-[1160px] px-[1.1rem]">
-    <div class="grid gap-4 lg:grid-cols-[1.4fr_1fr] lg:items-stretch">
+    <div class="grid gap-4 lg:grid-cols-[1.75fr_1fr] lg:items-stretch">
         <article
                 class="rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] p-[1.1rem] [box-shadow:var(--shadow)] lg:flex lg:h-[34rem] lg:flex-col">
             <h2 class="mb-[0.8rem] mt-0 font-display text-[1.2rem] text-[var(--ink-strong)]">Career Timeline</h2>
@@ -27,29 +28,58 @@
                     {{- $roles = slice (dict "title" $employment.title "range" $employment.range "details" $employment.details) -}}
                     {{- end -}}
                     {{- $org := $employment.org | default $employment.company -}}
-                    {{- $employmentMeta := "" -}}
-                    {{- with $employment.employment_type -}}
-                    {{- $employmentMeta = . -}}
-                    {{- end -}}
-                    {{- with $employment.location -}}
-                    {{- if $employmentMeta -}}
-                    {{- $employmentMeta = printf "%s · %s" $employmentMeta . -}}
-                    {{- else -}}
-                    {{- $employmentMeta = . -}}
-                    {{- end -}}
-                    {{- end -}}
                     <div class="career-employment relative pl-5">
                         <span class="absolute left-0 top-0 h-full w-px bg-[color:rgba(73,208,196,0.45)]"></span>
                         <span class="absolute left-[-4px] top-[0.22rem] h-[9px] w-[9px] rounded-full border border-[color:rgba(73,208,196,0.8)] bg-[color:rgba(73,208,196,0.24)]"></span>
                         <article class="career-employment-card rounded-xl border border-[color:rgba(127,184,255,0.24)] bg-[linear-gradient(150deg,rgba(127,184,255,0.06),rgba(73,208,196,0.05))] p-[0.85rem]">
-                            <h3 class="m-0 font-display text-[1.12rem] text-[var(--ink-strong)]">{{ $org }}</h3>
-                            {{ if $employmentMeta }}
-                            <p class="mb-0 mt-[0.14rem] text-[0.82rem] font-medium text-[var(--timeline-org)]">{{ $employmentMeta }}</p>
-                            {{ end }}
+                            <div class="career-employment-header flex items-start gap-[0.68rem]">
+                                {{ with $employment.logo }}
+                                <img class="career-employment-logo mt-[0.08rem] h-10 w-10 rounded-lg object-contain p-[0.18rem]{{ if $employment.logo_light_bg_on_dark }} career-logo-light-bg-on-dark{{ end }}" src="{{ . }}"
+                                     alt="{{ $org }} logo"
+                                     data-lightbox-src="{{ . }}"
+                                     data-lightbox-caption="{{ $org }} logo"
+                                     {{ if $employment.logo_light_bg_on_dark }}data-lightbox-light-bg-on-dark="true"{{ end }}
+                                     loading="lazy"/>
+                                {{ end }}
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="m-0 font-display text-[1.12rem] text-[var(--ink-strong)]">{{ $org }}</h3>
+                                    {{ with $employment.formerly }}
+                                    <div class="career-formerly-row mt-[0.22rem] flex flex-wrap items-center gap-[0.32rem]">
+                                        <p class="mb-0 mt-0 whitespace-nowrap text-[0.69rem] font-semibold uppercase tracking-[0.04em] text-[var(--story-meta)]">Formerly</p>
+                                        <div class="career-formerly-list flex flex-wrap items-center gap-[0.34rem]">
+                                            {{ range . }}
+                                            {{- $formerName := "" -}}
+                                            {{- $formerLogo := "" -}}
+                                            {{- $formerLogoLightBgOnDark := false -}}
+                                            {{- if reflect.IsMap . -}}
+                                            {{- $formerName = .name | default .org | default "" -}}
+                                            {{- $formerLogo = .logo | default "" -}}
+                                            {{- $formerLogoLightBgOnDark = .logo_light_bg_on_dark | default false -}}
+                                            {{- else -}}
+                                            {{- $formerName = . -}}
+                                            {{- end -}}
+                                            <span class="career-formerly-chip inline-flex items-center gap-[0.3rem] rounded-full border border-[color:rgba(127,184,255,0.34)] bg-[color:rgba(127,184,255,0.1)] px-[0.46rem] py-[0.1rem] text-[0.68rem] font-semibold text-[var(--timeline-org)]">
+                                                {{ with $formerLogo }}
+                                                <img class="career-formerly-logo h-[0.92rem] w-[0.92rem] rounded-[0.22rem] object-contain p-[0.08rem]{{ if $formerLogoLightBgOnDark }} career-logo-light-bg-on-dark{{ end }}" src="{{ . }}"
+                                                     alt="{{ $formerName }} logo"
+                                                     data-lightbox-src="{{ . }}"
+                                                     data-lightbox-caption="{{ $formerName }} logo"
+                                                     {{ if $formerLogoLightBgOnDark }}data-lightbox-light-bg-on-dark="true"{{ end }}
+                                                     loading="lazy"/>
+                                                {{ end }}
+                                                <span>{{ $formerName }}</span>
+                                            </span>
+                                            {{ end }}
+                                        </div>
+                                    </div>
+                                    {{ end }}
+                                </div>
+                            </div>
                             <div class="career-role-stack mt-3 space-y-[0.8rem]">
                                 {{- $roleTotal := len $roles -}}
                                 {{ range $roleIndex, $role := $roles }}
                                 {{- $roleMeta := "" -}}
+                                {{- $roleOrg := $role.org | default "" -}}
                                 {{- with $role.range -}}
                                 {{- $roleMeta = . -}}
                                 {{- end -}}
@@ -63,6 +93,13 @@
                                 <div class="career-role-item{{ if eq (add $roleIndex 1) $roleTotal }} career-role-item-last{{ end }}">
                                     {{ if $roleMeta }}
                                     <p class="mb-[0.2rem] mt-0 font-mono text-[0.76rem] text-[var(--warning)]">{{ $roleMeta }}</p>
+                                    {{ end }}
+                                    {{ if and $roleOrg (ne $roleOrg $org) }}
+                                    <p class="mb-[0.22rem] mt-0">
+                                        <span class="career-role-brand inline-flex rounded-full border border-[color:rgba(127,184,255,0.38)] bg-[color:rgba(127,184,255,0.12)] px-[0.42rem] py-[0.06rem] text-[0.68rem] font-semibold uppercase tracking-[0.03em] text-[var(--timeline-org)]">
+                                            {{ $roleOrg }}
+                                        </span>
+                                    </p>
                                     {{ end }}
                                     {{ with $role.title }}
                                     <h4 class="m-0 font-display text-[1.02rem] leading-[1.25] text-[var(--ink-strong)]">{{ . }}</h4>
@@ -486,7 +523,8 @@
         {{ end }}
     </article>
 </section>
-{{ partial "image-lightbox.html" (dict "scopeSelector" "#career-certifications") }}
+{{ partial "image-lightbox.html" (dict "scopeSelector" "#career-lightbox-scope") }}
+</div>
 
 <section class="animate-reveal motion-reduce:animate-none mx-auto mt-[2.4rem] w-full max-w-[1160px] px-[1.1rem]">
     <div class="mb-4 flex items-baseline justify-between gap-[0.8rem]">
