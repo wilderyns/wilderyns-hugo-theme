@@ -1,0 +1,37 @@
+<div id="cookie-notice" class="fixed inset-x-[0.8rem] bottom-[0.8rem] z-[110] mx-auto hidden max-w-[760px] rounded-lg border border-[var(--line)] bg-[image:var(--surface)] p-3 text-[0.9rem] text-[var(--ink)] shadow-[var(--shadow)] md:bottom-[1.1rem] md:flex-row md:items-center md:gap-4" role="region" aria-label="Cookie notice">
+    <p class="m-0 flex-1">
+        Tiny cookie note: this devblog remembers your theme choice, your cookie notice choice, and may receive necessary Cloudflare or ad cookies.
+        <a class="font-bold text-[var(--accent-2)] underline decoration-[color:rgba(127,184,255,0.45)] underline-offset-2 hover:text-[var(--ink-strong)]" href="{{ "/privacy-policy/" | relURL }}">Privacy</a>
+        and
+        <a class="font-bold text-[var(--accent-2)] underline decoration-[color:rgba(127,184,255,0.45)] underline-offset-2 hover:text-[var(--ink-strong)]" href="{{ "/terms-of-service/" | relURL }}">Terms</a>.
+    </p>
+    <button id="cookie-notice-accept" class="mt-3 inline-flex rounded-lg border border-[var(--button-border)] bg-[image:var(--button-bg)] px-3 py-2 text-[0.86rem] font-bold leading-none text-[var(--button-ink)] md:mt-0" type="button">Got it</button>
+</div>
+<script>
+    (function () {
+        var key = "wilderyns-cookie-notice";
+        var notice = document.getElementById("cookie-notice");
+        var button = document.getElementById("cookie-notice-accept");
+        if (!notice || !button) return;
+
+        var seen = false;
+        try {
+            seen = localStorage.getItem(key) === "ok";
+        } catch (e) {
+        }
+
+        if (!seen) {
+            notice.classList.remove("hidden");
+            notice.classList.add("flex");
+        }
+
+        button.addEventListener("click", function () {
+            try {
+                localStorage.setItem(key, "ok");
+            } catch (e) {
+            }
+            notice.classList.add("hidden");
+            notice.classList.remove("flex");
+        });
+    })();
+</script>

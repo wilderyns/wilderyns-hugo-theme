@@ -1,0 +1,19 @@
+{{- $page := . -}}
+{{- $imageURL := "" -}}
+{{- $image := $page.Params.featured_image | default $page.Params.image -}}
+{{- with $image -}}
+{{- $resolved := partial "resolve-image.html" (dict "page" $page "image" .) -}}
+{{- if or (hasPrefix $resolved "http://") (hasPrefix $resolved "https://") -}}
+{{- $imageURL = $resolved -}}
+{{- else if $resolved -}}
+{{- $imageURL = $resolved | absURL -}}
+{{- end -}}
+{{- end -}}
+{{- if not $imageURL -}}
+{{- with site.Params.images -}}
+{{- with index . 0 -}}
+{{- $imageURL = . | absURL -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- return $imageURL -}}
