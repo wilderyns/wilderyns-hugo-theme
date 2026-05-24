@@ -59,10 +59,10 @@
 {{- $fallback := index $fallbacks (sub (len $fallbacks) 1) -}}
 <picture{{ with $pictureClass }} class="{{ . }}"{{ end }}>
     <source type="image/webp" srcset="{{ delimit $webpSrcset ", " }}" sizes="{{ $sizes }}"/>
-    <img class="{{ $class }}" src="{{ $fallback.RelPermalink }}" srcset="{{ delimit $fallbackSrcset ", " }}" sizes="{{ $sizes }}" width="{{ $fallback.Width }}" height="{{ $fallback.Height }}" alt="{{ $alt }}" loading="{{ $loading }}" decoding="{{ $decoding }}"{{ with $fetchpriority }} fetchpriority="{{ . }}"{{ end }}{{ with $title }} title="{{ . }}"{{ end }}/>
+    <img class="{{ $class }}" src="{{ $fallback.RelPermalink }}" srcset="{{ delimit $fallbackSrcset ", " }}" sizes="{{ $sizes }}" width="{{ $fallback.Width }}" height="{{ $fallback.Height }}" alt="{{ $alt }}" loading="{{ $loading }}" decoding="{{ $decoding }}" data-lightbox-src="{{ $resource.RelPermalink }}"{{ with $fetchpriority }} fetchpriority="{{ . }}"{{ end }}{{ with $title }} title="{{ . }}"{{ end }}/>
 </picture>
 {{- else -}}
-<img class="{{ $class }}" src="{{ $resource.RelPermalink }}"{{ with $resource.Width }} width="{{ . }}"{{ end }}{{ with $resource.Height }} height="{{ . }}"{{ end }} alt="{{ $alt }}" loading="{{ $loading }}" decoding="{{ $decoding }}"{{ with $fetchpriority }} fetchpriority="{{ . }}"{{ end }}{{ with $title }} title="{{ . }}"{{ end }}/>
+<img class="{{ $class }}" src="{{ $resource.RelPermalink }}"{{ with $resource.Width }} width="{{ . }}"{{ end }}{{ with $resource.Height }} height="{{ . }}"{{ end }} alt="{{ $alt }}" loading="{{ $loading }}" decoding="{{ $decoding }}" data-lightbox-src="{{ $resource.RelPermalink }}"{{ with $fetchpriority }} fetchpriority="{{ . }}"{{ end }}{{ with $title }} title="{{ . }}"{{ end }}/>
 {{- end -}}
 {{- else -}}
 {{- if or (hasPrefix $image "http://") (hasPrefix $image "https://") (hasPrefix $image "//") -}}
@@ -74,6 +74,6 @@
 {{- else -}}
 {{- $url = $image -}}
 {{- end -}}
-<img class="{{ $class }}" src="{{ $url | safeURL }}" alt="{{ $alt }}" loading="{{ $loading }}" decoding="{{ $decoding }}"{{ with $fetchpriority }} fetchpriority="{{ . }}"{{ end }}{{ with $title }} title="{{ . }}"{{ end }}/>
+<img class="{{ $class }}" src="{{ $url | safeURL }}" alt="{{ $alt }}" loading="{{ $loading }}" decoding="{{ $decoding }}" data-lightbox-src="{{ $url | safeURL }}"{{ with $fetchpriority }} fetchpriority="{{ . }}"{{ end }}{{ with $title }} title="{{ . }}"{{ end }}/>
 {{- end -}}
 {{- end -}}
