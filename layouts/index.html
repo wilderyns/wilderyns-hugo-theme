@@ -1,7 +1,7 @@
 {{ define "main" }}
 {{- $posts := first 6 (where site.RegularPages "Section" "blog") -}}
 {{- $projects := first 3 (where site.RegularPages "Section" "projects") -}}
-{{- $profile := hugo.Data.profile -}}
+{{- $profile := site.Data.profile -}}
 {{- $aboutTitle := site.Params.homepage.aboutTitle | default "About Me" -}}
 {{- $aboutText := site.Params.homepage.aboutText | default site.Params.author.statement -}}
 {{- $wuu2URL := site.Params.integrations.wuu2.url | default "" -}}
