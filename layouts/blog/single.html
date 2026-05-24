@@ -1,6 +1,5 @@
 {{ define "main" }}
 {{- $image := .Params.featured_image | default .Params.image -}}
-{{- $imageURL := partial "resolve-image.html" (dict "page" . "image" $image) -}}
 {{- $googleAds := site.Params.integrations.googleAds -}}
 {{- $adsEnabled := and $googleAds (or (eq (printf "%v" $googleAds.enabled) "true") (eq (printf "%v" $googleAds.enabled) "1")) -}}
 {{- $adClient := "" -}}
@@ -113,9 +112,19 @@
         {{ end }}
     </header>
 
-    {{ if $imageURL }}
+    {{ if $image }}
     <figure class="m-0 mb-[1.3rem] w-full overflow-hidden rounded-xl border border-[var(--line)]">
-        <img class="block h-auto w-full object-cover" src="{{ $imageURL }}" alt="" loading="lazy"/>
+        {{ partial "responsive-image.html" (dict
+            "page" .
+            "image" $image
+            "kind" "cover"
+            "class" "block h-auto w-full object-cover"
+            "pictureClass" "block"
+            "loading" "eager"
+            "fetchpriority" "high"
+            "sizes" "(min-width: 1160px) 1090px, 100vw"
+            "widths" (slice 720 960 1280 1600)
+        ) }}
     </figure>
     {{ end }}
 

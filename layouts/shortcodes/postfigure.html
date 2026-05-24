@@ -4,10 +4,11 @@
 {{- $side := lower (.Get "side" | default "") -}}
 {{- $size := lower (.Get "size" | default "md") -}}
 {{- $class := .Get "class" | default "" -}}
-{{- $resolved := partial "resolve-image.html" (dict "page" .Page "image" $src) -}}
 {{- $figureClass := "my-[1.2rem] max-w-full" -}}
 {{- $sideClass := "" -}}
 {{- $sizeClass := "md:max-w-[min(44%,360px)]" -}}
+{{- $sizes := "(min-width: 768px) 44vw, 100vw" -}}
+{{- $widths := slice 360 520 720 -}}
 
 {{- if eq $side "left" -}}
 {{- $sideClass = "md:float-left md:ml-[0.35rem] md:mr-[1.15rem] md:mb-[0.95rem] md:mt-[0.35rem]" -}}
@@ -17,14 +18,24 @@
 
 {{- if eq $size "sm" -}}
 {{- $sizeClass = "md:max-w-[min(36%,300px)]" -}}
+{{- $sizes = "(min-width: 768px) 36vw, 100vw" -}}
+{{- $widths = slice 300 420 600 -}}
 {{- else if eq $size "lg" -}}
 {{- $sizeClass = "md:max-w-[min(52%,440px)]" -}}
+{{- $sizes = "(min-width: 768px) 52vw, 100vw" -}}
+{{- $widths = slice 440 640 880 -}}
 {{- end -}}
 
-{{- if $resolved -}}
+{{- if $src -}}
 <figure class="{{ $figureClass }} {{ $sideClass }} {{ $sizeClass }} {{ $class }}">
-    <img class="mx-auto my-[1.1rem] block h-auto max-w-full rounded-[10px] border border-[var(--line)]"
-         src="{{ $resolved }}" alt="{{ $alt }}" loading="lazy"/>
+    {{ partial "responsive-image.html" (dict
+        "page" .Page
+        "image" $src
+        "alt" $alt
+        "class" "mx-auto my-[1.1rem] block h-auto max-w-full rounded-[10px] border border-[var(--line)]"
+        "sizes" $sizes
+        "widths" $widths
+    ) }}
     {{ with $caption }}
     <figcaption class="mt-[0.38rem] text-center text-[0.8rem] text-[var(--story-meta)]">{{ . | markdownify }}
     </figcaption>

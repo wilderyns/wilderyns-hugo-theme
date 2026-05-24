@@ -1,0 +1,21 @@
+{{- $alt := .PlainText | default "" -}}
+{{- $title := .Title | default "" -}}
+{{- $image := partial "responsive-image.html" (dict
+    "page" .Page
+    "image" .Destination
+    "alt" $alt
+    "title" $title
+    "class" "mx-auto my-[1.1rem] block h-auto max-w-full rounded-[10px] border border-[var(--line)]"
+    "sizes" "(min-width: 940px) 940px, calc(100vw - 2.2rem)"
+    "widths" (slice 480 720 960 1280 1600)
+) -}}
+{{- if .IsBlock -}}
+<figure class="m-0">
+    {{ $image }}
+    {{- with $title }}
+    <figcaption>{{ . }}</figcaption>
+    {{- end }}
+</figure>
+{{- else -}}
+{{ $image }}
+{{- end -}}

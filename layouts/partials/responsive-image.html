@@ -1,0 +1,79 @@
+{{- $page := .page -}}
+{{- $image := .image | default "" -}}
+{{- $class := .class | default "block h-auto max-w-full" -}}
+{{- $pictureClass := .pictureClass | default "" -}}
+{{- $loading := .loading | default "lazy" -}}
+{{- $decoding := .decoding | default "async" -}}
+{{- $fetchpriority := .fetchpriority | default "" -}}
+{{- $sizes := .sizes | default "100vw" -}}
+{{- $widths := .widths | default (slice 480 720 960 1280) -}}
+{{- $quality := .quality | default 82 -}}
+{{- $webpQuality := .webpQuality | default 74 -}}
+{{- $kind := .kind | default "image" -}}
+{{- $title := .title | default "" -}}
+{{- $alt := .alt | default "" -}}
+{{- $resource := "" -}}
+{{- $url := "" -}}
+
+{{- if and (not $alt) $page -}}
+{{- $alt = $page.Params.featured_image_alt | default $page.Params.image_alt | default $page.Params.cover_image_alt | default "" -}}
+{{- end -}}
+{{- if and (not $alt) $page.Title -}}
+{{- if eq $kind "cover" -}}
+{{- $alt = printf "Cover image for %s" $page.Title -}}
+{{- else -}}
+{{- $alt = printf "Image for %s" $page.Title -}}
+{{- end -}}
+{{- end -}}
+
+{{- if $image -}}
+{{- if $page -}}
+{{- $resource = $page.Resources.GetMatch $image -}}
+{{- if and (not $resource) (not (hasPrefix $image "/")) -}}
+{{- $resource = $page.Resources.GetMatch (printf "*%s*" $image) -}}
+{{- end -}}
+{{- end -}}
+
+{{- if $resource -}}
+{{- if reflect.IsImageResourceProcessable $resource -}}
+{{- $candidateWidths := slice -}}
+{{- range $widths -}}
+{{- $width := int . -}}
+{{- if le $width $resource.Width -}}
+{{- $candidateWidths = $candidateWidths | append $width -}}
+{{- end -}}
+{{- end -}}
+{{- if eq (len $candidateWidths) 0 -}}
+{{- $candidateWidths = $candidateWidths | append $resource.Width -}}
+{{- end -}}
+{{- $fallbacks := slice -}}
+{{- $fallbackSrcset := slice -}}
+{{- $webpSrcset := slice -}}
+{{- range $candidateWidths -}}
+{{- $fallback := $resource.Resize (printf "%dx q%d" . $quality) -}}
+{{- $webp := $resource.Resize (printf "%dx webp q%d" . $webpQuality) -}}
+{{- $fallbacks = $fallbacks | append $fallback -}}
+{{- $fallbackSrcset = $fallbackSrcset | append (printf "%s %dw" $fallback.RelPermalink $fallback.Width) -}}
+{{- $webpSrcset = $webpSrcset | append (printf "%s %dw" $webp.RelPermalink $webp.Width) -}}
+{{- end -}}
+{{- $fallback := index $fallbacks (sub (len $fallbacks) 1) -}}
+<picture{{ with $pictureClass }} class="{{ . }}"{{ end }}>
+    <source type="image/webp" srcset="{{ delimit $webpSrcset ", " }}" sizes="{{ $sizes }}"/>
+    <img class="{{ $class }}" src="{{ $fallback.RelPermalink }}" srcset="{{ delimit $fallbackSrcset ", " }}" sizes="{{ $sizes }}" width="{{ $fallback.Width }}" height="{{ $fallback.Height }}" alt="{{ $alt }}" loading="{{ $loading }}" decoding="{{ $decoding }}"{{ with $fetchpriority }} fetchpriority="{{ . }}"{{ end }}{{ with $title }} title="{{ . }}"{{ end }}/>
+</picture>
+{{- else -}}
+<img class="{{ $class }}" src="{{ $resource.RelPermalink }}"{{ with $resource.Width }} width="{{ . }}"{{ end }}{{ with $resource.Height }} height="{{ . }}"{{ end }} alt="{{ $alt }}" loading="{{ $loading }}" decoding="{{ $decoding }}"{{ with $fetchpriority }} fetchpriority="{{ . }}"{{ end }}{{ with $title }} title="{{ . }}"{{ end }}/>
+{{- end -}}
+{{- else -}}
+{{- if or (hasPrefix $image "http://") (hasPrefix $image "https://") (hasPrefix $image "//") -}}
+{{- $url = $image -}}
+{{- else if hasPrefix $image "/" -}}
+{{- $url = relURL (strings.TrimPrefix "/" $image) -}}
+{{- else if and $page $page.File $page.File.Dir -}}
+{{- $url = relURL (path.Join $page.File.Dir $image) -}}
+{{- else -}}
+{{- $url = $image -}}
+{{- end -}}
+<img class="{{ $class }}" src="{{ $url | safeURL }}" alt="{{ $alt }}" loading="{{ $loading }}" decoding="{{ $decoding }}"{{ with $fetchpriority }} fetchpriority="{{ . }}"{{ end }}{{ with $title }} title="{{ . }}"{{ end }}/>
+{{- end -}}
+{{- end -}}

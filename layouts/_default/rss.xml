@@ -23,7 +23,7 @@
         <link>{{ .Permalink }}</link>
         <description>{{ $channelDescription }}</description>
         <generator>Hugo -- gohugo.io</generator>
-        <language>{{ site.Language.LanguageCode }}</language>
+        <language>{{ site.Language.Locale }}</language>
         {{ with site.Copyright }}
         <copyright>{{ . }}</copyright>
         {{ end }}

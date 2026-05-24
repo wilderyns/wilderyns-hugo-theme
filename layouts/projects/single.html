@@ -1,6 +1,5 @@
 {{ define "main" }}
 {{- $image := .Params.featured_image | default .Params.image -}}
-{{- $imageURL := partial "resolve-image.html" (dict "page" . "image" $image) -}}
 
 <article
         class="js-lightbox-scope animate-reveal motion-reduce:animate-none mx-auto mt-[1.2rem] w-full max-w-[1160px] overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] px-[1.1rem] py-[1.3rem] [box-shadow:var(--shadow)]">
@@ -20,9 +19,19 @@
             {{ end }}
         </header>
 
-        {{ if $imageURL }}
+        {{ if $image }}
         <figure class="mx-auto mb-[1.3rem] max-w-[94ch] overflow-hidden rounded-xl border border-[var(--line)]">
-            <img class="block h-full w-full object-cover" src="{{ $imageURL }}" alt="" loading="lazy"/>
+            {{ partial "responsive-image.html" (dict
+                "page" .
+                "image" $image
+                "kind" "cover"
+                "class" "block h-auto w-full object-cover"
+                "pictureClass" "block"
+                "loading" "eager"
+                "fetchpriority" "high"
+                "sizes" "(min-width: 940px) 940px, 100vw"
+                "widths" (slice 720 960 1280)
+            ) }}
         </figure>
         {{ end }}
 

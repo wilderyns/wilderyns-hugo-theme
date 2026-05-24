@@ -2,13 +2,21 @@
 {{- $index := .index | default 0 -}}
 {{- $flip := eq (mod $index 2) 1 -}}
 {{- $image := $post.Params.featured_image | default $post.Params.image -}}
-{{- $imageURL := partial "resolve-image.html" (dict "page" $post "image" $image) -}}
 
 <article
         class="grid overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[image:var(--surface)] [box-shadow:var(--shadow)] md:grid-cols-[minmax(240px,34%)_1fr]">
     <a class="min-h-[220px] {{ if $flip }}md:order-2{{ end }}" href="{{ $post.RelPermalink }}">
-        {{ if $imageURL }}
-        <img class="block h-full w-full object-cover" src="{{ $imageURL }}" alt="" loading="lazy"/>
+        {{ if $image }}
+        {{ partial "responsive-image.html" (dict
+            "page" $post
+            "image" $image
+            "kind" "cover"
+            "class" "block h-full w-full object-cover"
+            "pictureClass" "block h-full w-full"
+            "sizes" "(min-width: 1160px) 377px, (min-width: 768px) 34vw, calc(100vw - 2.2rem)"
+            "widths" (slice 360 520 720 840)
+            "webpQuality" 72
+        ) }}
         {{ else }}
         <div class="flex h-full items-center justify-center bg-[image:var(--placeholder-bg)] font-mono text-[0.85rem] font-bold uppercase tracking-[0.08em] text-[var(--placeholder-ink)]">
             <span>Feature Image</span></div>
